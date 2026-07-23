@@ -956,8 +956,9 @@ const BFT = {
     for (const k of ["sprint", "hang", "run"]){
       const b = this.basePoints(k, raw[k], A);
       if (b == null){ p[k] = null; continue; }
+      const baseR = this.nn(b); // Basispunkte = Tabellenwert (ganzzahlig gerundet)
       const gP = sex === "w" ? S[gKey[k]] : 0;
-      p[k] = this.nn(b * (1 + gP + aP));
+      p[k] = this.nn(baseR * (1 + gP + aP)); // Disziplinpunkte = Basispunkte + Alters-/Geschlechtszuschlag
     }
     const pass = {
       sprint: sprint != null && sprint <= A.sprint.p100,
@@ -1113,7 +1114,9 @@ const DISC_INFO = {
       '<span class="tag">Häufige Fehler</span><ul>' +
       '<li>Zu schneller Start und Einbruch auf der zweiten Hälfte – Tempo gleichmäßig einteilen</li>' +
       '<li>Beim Fahrradergometer die Trittfrequenz unter die Vorgabe fallen lassen</li>' +
-      '<li>Ohne Erwärmung starten</li></ul>'
+      '<li>Ohne Erwärmung starten</li></ul>' +
+      '<span class="tag">Hinweis zur Wertung</span><ul>' +
+      '<li>Die maßgebliche Weisung (Zentralanweisung B1-224/0-2) regelt die Punkte für den 1000-m-Lauf. Der Fahrradergometer-Test stammt aus dem Bewerber-Einstellungstest; diese App wertet ihn näherungsweise wie den 1000-m-Lauf.</li></ul>'
   },
   allgemein: {
     title: "Allgemeine Informationen zum BFT",
