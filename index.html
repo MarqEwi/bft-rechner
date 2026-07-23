@@ -671,6 +671,15 @@
       <div><label class="field">100 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run100-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run100-sec" placeholder="sek" inputmode="numeric"></div></div>
       <div><label class="field">400 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run400-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run400-sec" placeholder="sek" inputmode="numeric"></div></div>
     </div>
+    <h3>Zuschläge</h3>
+    <div class="row2">
+      <div><label class="field" for="calc-gs">Frauen Sprint (%)</label><input type="text" id="calc-gs" inputmode="decimal" placeholder="15"></div>
+      <div><label class="field" for="calc-gh">Frauen Klimmhang (%)</label><input type="text" id="calc-gh" inputmode="decimal" placeholder="40"></div>
+    </div>
+    <div class="row2">
+      <div><label class="field" for="calc-gr">Frauen 1000-m-Lauf (%)</label><input type="text" id="calc-gr" inputmode="decimal" placeholder="15"></div>
+      <div><label class="field" for="calc-age">Alter (% pro Jahr ab 36)</label><input type="text" id="calc-age" inputmode="decimal" placeholder="0,5"></div>
+    </div>
     <div id="calc-err" class="hint-fail" style="display:none"></div>
     <div class="btn-row" style="margin-top:14px">
       <button class="btn" id="calc-save">Speichern &amp; aktivieren</button>
@@ -835,7 +844,8 @@ const Calc = {
   STANDARD: {
     id: "standard",
     name: "Standard (offiziell)",
-    anchors: { sprint: {p100:60, p400:42}, hang: {p100:5, p400:65}, run: {p100:390, p400:225} }
+    anchors: { sprint: {p100:60, p400:42}, hang: {p100:5, p400:65}, run: {p100:390, p400:225} },
+    surch: { gS: 0.15, gH: 0.40, gR: 0.15, age: 0.005 }
   },
   customs(){ return load(this.CUSTOM_KEY, []); },
   list(){ return [this.STANDARD, ...this.customs()]; },
@@ -864,7 +874,6 @@ const Calc = {
    Ohne Gewähr – maßgeblich ist die offizielle Wertung. --------------------- */
 const BFT = {
   CAP: 500,
-  GENDER: { sprint: 0.15, hang: 0.40, run: 0.15 },
   nn(p){ return Math.max(0, Math.round(p)); },
   basePoints(disc, t, A){
     if (disc === "hang"){ if (!(t >= 0)) return null; return 100 + (t - A.hang.p100) / (A.hang.p400 - A.hang.p100) * 300; }
@@ -872,17 +881,19 @@ const BFT = {
     const a = A[disc]; // Sprint & Lauf: kürzere Zeit = mehr Punkte
     return 100 + (a.p100 - t) / (a.p100 - a.p400) * 300;
   },
-  agePct(age, noAge){ return (noAge || age == null || !(age > 35)) ? 0 : (Math.min(age, 90) - 35) * 0.005; },
   thresholds(){ const A = Calc.active().anchors; return { sprint: A.sprint.p100, hang: A.hang.p100, run: A.run.p100 }; },
+  surch(){ return Calc.active().surch || Calc.STANDARD.surch; },
   evaluate({sprint, hang, run, sex, age, noAge}){
-    const A = Calc.active().anchors;
-    const aP = this.agePct(age, noAge);
+    const c = Calc.active();
+    const A = c.anchors, S = c.surch || Calc.STANDARD.surch;
+    const aP = (noAge || age == null || !(age > 35)) ? 0 : (Math.min(age, 90) - 35) * S.age;
+    const gKey = { sprint: "gS", hang: "gH", run: "gR" };
     const raw = { sprint, hang, run };
     const p = {};
     for (const k of ["sprint", "hang", "run"]){
       const b = this.basePoints(k, raw[k], A);
       if (b == null){ p[k] = null; continue; }
-      const gP = sex === "w" ? this.GENDER[k] : 0;
+      const gP = sex === "w" ? S[gKey[k]] : 0;
       p[k] = this.nn(b * (1 + gP + aP));
     }
     const pass = {
@@ -893,27 +904,25 @@ const BFT = {
     const complete = p.sprint != null && p.hang != null && p.run != null;
     const allPass = complete && pass.sprint && pass.hang && pass.run;
     const total = complete ? p.sprint + p.hang + p.run : null;
-    let grade = null, gradeClass = null;
+    /* Offizielle Bewertung (Zentralanweisung B1-224/0-2): je Disziplin eine Note
+       aus den Disziplinpunkten (100→4,49 … 449+→1,0), Gesamtnote = Mittelwert. */
+    const dNote = k => { if (!pass[k] || p[k] == null) return null; return Math.max(1.0, Math.min(4.49, 4.49 - (p[k] - 100) / 100)); };
+    const dn = { sprint: dNote("sprint"), hang: dNote("hang"), run: dNote("run") };
+    const fmtN = x => x == null ? null : (Math.round(x * 100) / 100).toFixed(2).replace(".", ",");
+    const discNotes = { sprint: fmtN(dn.sprint), hang: fmtN(dn.hang), run: fmtN(dn.run) };
+    let grade = null, gradeClass = null, noteText = null;
     if (complete){
       if (!allPass){ grade = "nicht bestanden"; gradeClass = "g-fail"; }
-      else if (total >= 1200){ grade = "sehr gut"; gradeClass = "g-sehrgut"; }
-      else if (total >= 900){ grade = "gut"; gradeClass = "g-gut"; }
-      else if (total >= 600){ grade = "befriedigend"; gradeClass = "g-befr"; }
-      else { grade = "ausreichend"; gradeClass = "g-ausr"; }
-    }
-    let noteText = null;
-    if (complete){
-      let n;
-      if (!allPass) n = 5.0;
-      else if (total >= 1200) n = 1.0;
       else {
-        const top = total >= 900 ? 2 : total >= 600 ? 3 : 4;
-        const startv = total >= 900 ? 900 : total >= 600 ? 600 : 300;
-        n = top - (total - startv) / 300 * 0.9;
+        const mean = Math.round((dn.sprint + dn.hang + dn.run) / 3 * 100) / 100;
+        noteText = mean.toFixed(2).replace(".", ",");
+        if (mean <= 1.49){ grade = "sehr gut"; gradeClass = "g-sehrgut"; }
+        else if (mean <= 2.49){ grade = "gut"; gradeClass = "g-gut"; }
+        else if (mean <= 3.49){ grade = "zufriedenstellend"; gradeClass = "g-befr"; }
+        else { grade = "ausreichend"; gradeClass = "g-ausr"; }
       }
-      noteText = (Math.round(n * 10) / 10).toFixed(1).replace(".", ",");
     }
-    return { points: p, pass, complete, allPass, total, grade, gradeClass, noteText };
+    return { points: p, pass, discNotes, complete, allPass, total, grade, gradeClass, noteText };
   }
 };
 
@@ -1051,8 +1060,8 @@ const DISC_INFO = {
       '<span class="tag">Bewertung &amp; Note</span><ul>' +
       '<li>In jeder Disziplin sind mindestens 100 Punkte nötig – wird eine verfehlt, gilt der Test als nicht bestanden</li>' +
       '<li>Je Disziplin gibt es 100 Punkte für die Mindestleistung und 400 für die Bestleistung; darüber hinaus sind mehr Punkte möglich</li>' +
-      '<li>Die Gesamtnote ergibt sich aus der Punktsumme aller drei Disziplinen: ab 300 ausreichend, ab 600 befriedigend, ab 900 gut, ab 1200 sehr gut</li>' +
-      '<li>Diese App zeigt zusätzlich eine Dezimalnote (z. B. 1,0 = sehr gut … 5,0 = nicht bestanden)</li></ul>' +
+      '<li>Jede Disziplin erhält eine Note: 100–199 Punkte = ausreichend, 200–299 = zufriedenstellend, 300–399 = gut, ab 400 = sehr gut</li>' +
+      '<li>Die Gesamtnote ist der Mittelwert der drei Disziplin-Noten (auf zwei Nachkommastellen)</li></ul>' +
       '<span class="tag">Zuschläge</span><ul>' +
       '<li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang</li>' +
       '<li>Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht (in der App abschaltbar)</li>' +
@@ -1136,9 +1145,9 @@ function tRender(){
   $("t-r-run-name").textContent = inp.runType === "fet" ? "Fahrradergometer 3000 m" : "1000-m-Lauf";
   const th = BFT.thresholds();
   const rows = [
-    ["sprint", inp.sprint != null ? fmtSec(inp.sprint) + (r.pass.sprint ? "" : " · über " + fmtSec(th.sprint) + "!") : "–"],
-    ["hang",   inp.hang   != null ? fmtSec(inp.hang)   + (r.pass.hang   ? "" : " · unter " + th.hang + " s!") : "–"],
-    ["run",    inp.run    != null ? fmtTime(inp.run) + " min" + (r.pass.run ? "" : " · über " + fmtTime(th.run) + "!") : "–"]
+    ["sprint", inp.sprint != null ? fmtSec(inp.sprint) + (r.pass.sprint ? (r.discNotes.sprint ? " · Note " + r.discNotes.sprint : "") : " · über " + fmtSec(th.sprint) + "!") : "–"],
+    ["hang",   inp.hang   != null ? fmtSec(inp.hang)   + (r.pass.hang   ? (r.discNotes.hang ? " · Note " + r.discNotes.hang : "") : " · unter " + th.hang + " s!") : "–"],
+    ["run",    inp.run    != null ? fmtTime(inp.run) + " min" + (r.pass.run ? (r.discNotes.run ? " · Note " + r.discNotes.run : "") : " · über " + fmtTime(th.run) + "!") : "–"]
   ];
   for (const [k, sub] of rows){
     const p = r.points[k];
@@ -1544,7 +1553,10 @@ function renderBerechnung(){
   html += '<div class="calc-line"><b>Sprinttest</b><span>' + fmtSec(A.sprint.p100) + " = 100 P · " + fmtSec(A.sprint.p400) + " = 400 P</span></div>";
   html += '<div class="calc-line"><b>Klimmhang</b><span>' + A.hang.p100 + " s = 100 P · " + A.hang.p400 + " s = 400 P</span></div>";
   html += '<div class="calc-line"><b>Ausdauer</b><span>' + runL(A.run.p100) + " = 100 P · " + runL(A.run.p400) + " = 400 P</span></div>";
-  html += '<p class="muted" style="font-size:.82rem">Zwischenwerte linear. Frauen-Zuschlag 15 % (Sprint, Ausdauer) bzw. 40 % (Klimmhang). Alterszuschlag +0,5 % pro Jahr ab 36. Gesamtnote aus der Punktsumme (ab 300 ausreichend … ab 1200 sehr gut).</p>';
+  const S = a.surch || Calc.STANDARD.surch, pc = f => String(Math.round(f * 1000) / 10).replace(".", ",");
+  html += '<div class="calc-line"><b>Zuschlag Frauen</b><span>Sprint +' + pc(S.gS) + " % · Klimmhang +" + pc(S.gH) + " % · 1000 m +" + pc(S.gR) + " %</span></div>";
+  html += '<div class="calc-line"><b>Alterszuschlag</b><span>+' + pc(S.age) + " % pro Jahr ab 36</span></div>";
+  html += '<p class="muted" style="font-size:.82rem">Zwischenwerte linear. Note je Disziplin (100 P = ausreichend · 200 = zufriedenstellend · 300 = gut · ab 400 = sehr gut); Gesamtnote = Mittelwert der drei Disziplin-Noten (zwei Nachkommastellen).</p>';
   html += custom
     ? '<p class="muted" style="font-size:.82rem">Quelle: vom Nutzer angelegte Berechnung.</p>'
     : '<p class="muted" style="font-size:.82rem">Quelle: ' + esc(Calc.SOURCE) + "<br>Stand: " + Calc.STAND + "</p>";
@@ -1593,6 +1605,11 @@ function openCalcEditor(id){
   $("calc-hang400").value = String(A.hang.p400).replace(".", ",");
   $("calc-run100-min").value = Math.floor(A.run.p100 / 60); $("calc-run100-sec").value = A.run.p100 % 60;
   $("calc-run400-min").value = Math.floor(A.run.p400 / 60); $("calc-run400-sec").value = A.run.p400 % 60;
+  const S = (c && c.surch) ? c.surch : Calc.STANDARD.surch;
+  $("calc-gs").value = String(Math.round(S.gS * 1000) / 10).replace(".", ",");
+  $("calc-gh").value = String(Math.round(S.gH * 1000) / 10).replace(".", ",");
+  $("calc-gr").value = String(Math.round(S.gR * 1000) / 10).replace(".", ",");
+  $("calc-age").value = String(Math.round(S.age * 1000) / 10).replace(".", ",");
   $("calc-err").style.display = "none";
   openModal("modal-calc");
   $("calc-name").focus();
@@ -1603,14 +1620,16 @@ $("calc-save").addEventListener("click", () => {
   const hg100 = parseNum($("calc-hang100").value), hg400 = parseNum($("calc-hang400").value);
   const r100 = (parseNum($("calc-run100-min").value) || 0) * 60 + (parseNum($("calc-run100-sec").value) || 0);
   const r400 = (parseNum($("calc-run400-min").value) || 0) * 60 + (parseNum($("calc-run400-sec").value) || 0);
+  const gs = parseNum($("calc-gs").value), gh = parseNum($("calc-gh").value), gr = parseNum($("calc-gr").value), ag = parseNum($("calc-age").value);
   const err = [];
   if (!name) err.push("Bitte einen Namen angeben.");
   if (!(s100 > 0) || !(s400 > 0) || s400 >= s100) err.push("Sprinttest: die 400-Punkte-Zeit muss schneller (kleiner) sein als die 100-Punkte-Zeit.");
   if (!(hg100 >= 0) || !(hg400 > hg100)) err.push("Klimmhang: der 400-Punkte-Wert muss größer sein als der 100-Punkte-Wert.");
   if (!(r100 > 0) || !(r400 > 0) || r400 >= r100) err.push("Ausdauer: die 400-Punkte-Zeit muss schneller (kleiner) sein als die 100-Punkte-Zeit.");
+  if ([gs, gh, gr, ag].some(v => v == null || v < 0)) err.push("Zuschläge müssen 0 oder größer sein (in Prozent).");
   if (err.length){ $("calc-err").style.display = "block"; $("calc-err").innerHTML = err.join("<br>"); return; }
   const id = calcEditId || ("c" + Date.now().toString(36));
-  Calc.saveCustom({ id, name, anchors: { sprint:{p100:s100, p400:s400}, hang:{p100:hg100, p400:hg400}, run:{p100:r100, p400:r400} } });
+  Calc.saveCustom({ id, name, anchors: { sprint:{p100:s100, p400:s400}, hang:{p100:hg100, p400:hg400}, run:{p100:r100, p400:r400} }, surch: { gS: gs/100, gH: gh/100, gR: gr/100, age: ag/100 } });
   Calc.setActive(id);
   closeModal("modal-calc");
   onCalcChanged();
