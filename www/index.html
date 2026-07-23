@@ -114,6 +114,7 @@
   .checkline input{width:17px;height:17px;accent-color:#4a5d3a}
   .formula-hint{font-size:.84rem;color:var(--text2);margin:2px 0 4px}
   .formula-hint b{color:var(--text);font-variant-numeric:tabular-nums}
+  .std-hint{font-size:.78rem;color:var(--text2);margin:-2px 0 8px;font-style:italic}
   input[type=text],input[type=number],input[type=date],select{
     width:100%;padding:10px 12px;font:inherit;color:var(--text);
     background:var(--bg3);border:1px solid var(--line);border-radius:10px}
@@ -662,26 +663,59 @@
   <div class="modal" role="dialog" aria-modal="true" aria-label="Eigene Berechnung">
     <button class="iconbtn x" data-close="modal-calc" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     <h2 id="calc-title">Eigene Berechnung</h2>
-    <p class="muted">Passe die Berechnungsformeln an. „Zeit“ ist die gemessene Zeit in Sekunden; das Ergebnis sind die Basispunkte der Disziplin.</p>
+    <p class="muted">Passe die Berechnung an – wahlweise als Formel oder vereinfacht (Werte für 100 und 400 Punkte). „Zeit“ ist in Sekunden.</p>
     <label class="field" for="calc-name">Name der Berechnung</label>
     <input type="text" id="calc-name" maxlength="40" placeholder="z. B. Vereinsvorgabe 2026">
-    <h3>11 × 10 m-Sprinttest</h3>
-    <p class="formula-hint">Punkte = <b>A − B × Sprintzeit</b></p>
-    <div class="row2">
-      <div><label class="field" for="calc-s-a">A (Konstante)</label><input type="text" id="calc-s-a" inputmode="decimal" placeholder="1100"></div>
-      <div><label class="field" for="calc-s-b">B (Faktor)</label><input type="text" id="calc-s-b" inputmode="decimal" placeholder="16,667"></div>
+    <label class="field">Darstellung</label>
+    <div class="seg" id="calc-mode">
+      <button data-v="formula" class="active">Formel</button>
+      <button data-v="simple">Vereinfacht</button>
     </div>
-    <h3>Klimmhang</h3>
-    <p class="formula-hint">Punkte = <b>A + B × Klimmhangzeit</b></p>
-    <div class="row2">
-      <div><label class="field" for="calc-h-a">A (Konstante)</label><input type="text" id="calc-h-a" inputmode="decimal" placeholder="75"></div>
-      <div><label class="field" for="calc-h-b">B (Faktor)</label><input type="text" id="calc-h-b" inputmode="decimal" placeholder="5"></div>
+
+    <div id="calc-formula-fields">
+      <h3>11 × 10 m-Sprinttest</h3>
+      <p class="formula-hint">Punkte = <b>A − B × Sprintzeit</b></p>
+      <p class="std-hint">Standard: 1.100 − 16,667 × Sprintzeit (s)</p>
+      <div class="row2">
+        <div><label class="field" for="calc-s-a">A (Konstante)</label><input type="text" id="calc-s-a" inputmode="decimal" placeholder="1100"></div>
+        <div><label class="field" for="calc-s-b">B (Faktor)</label><input type="text" id="calc-s-b" inputmode="decimal" placeholder="16,667"></div>
+      </div>
+      <h3>Klimmhang</h3>
+      <p class="formula-hint">Punkte = <b>A + B × Klimmhangzeit</b></p>
+      <p class="std-hint">Standard: 75 + 5 × Klimmhangzeit (s)</p>
+      <div class="row2">
+        <div><label class="field" for="calc-h-a">A (Konstante)</label><input type="text" id="calc-h-a" inputmode="decimal" placeholder="75"></div>
+        <div><label class="field" for="calc-h-b">B (Faktor)</label><input type="text" id="calc-h-b" inputmode="decimal" placeholder="5"></div>
+      </div>
+      <h3>1000-m-Lauf</h3>
+      <p class="formula-hint">Punkte = <b>100 + (Referenzzeit − Laufzeit) × C</b></p>
+      <p class="std-hint">Standard: 100 + ((390 − Laufzeit) × 1,81818181)</p>
+      <div class="row2">
+        <div><label class="field" for="calc-r-ref">Referenzzeit (s)</label><input type="text" id="calc-r-ref" inputmode="decimal" placeholder="390"></div>
+        <div><label class="field" for="calc-r-c">C (Faktor)</label><input type="text" id="calc-r-c" inputmode="decimal" placeholder="1,81818181"></div>
+      </div>
     </div>
-    <h3>1000-m-Lauf</h3>
-    <p class="formula-hint">Punkte = <b>100 + (Referenzzeit − Laufzeit) × C</b></p>
-    <div class="row2">
-      <div><label class="field" for="calc-r-ref">Referenzzeit (s)</label><input type="text" id="calc-r-ref" inputmode="decimal" placeholder="390"></div>
-      <div><label class="field" for="calc-r-c">C (Faktor)</label><input type="text" id="calc-r-c" inputmode="decimal" placeholder="1,81818181"></div>
+
+    <div id="calc-simple-fields" style="display:none">
+      <p class="formula-hint">Lege je Disziplin fest, welche Leistung 100 Punkte (Mindestanforderung) und welche 400 Punkte (Bestwert) ergibt. Zwischenwerte werden linear berechnet.</p>
+      <h3>11 × 10 m-Sprinttest (Sekunden)</h3>
+      <p class="std-hint">Standard: 60 s = 100 P · 42 s = 400 P</p>
+      <div class="row2">
+        <div><label class="field" for="calc-sprint100">100 Punkte bei</label><input type="text" id="calc-sprint100" inputmode="decimal" placeholder="60"></div>
+        <div><label class="field" for="calc-sprint400">400 Punkte bei</label><input type="text" id="calc-sprint400" inputmode="decimal" placeholder="42"></div>
+      </div>
+      <h3>Klimmhang (Sekunden)</h3>
+      <p class="std-hint">Standard: 5 s = 100 P · 65 s = 400 P</p>
+      <div class="row2">
+        <div><label class="field" for="calc-hang100">100 Punkte bei</label><input type="text" id="calc-hang100" inputmode="decimal" placeholder="5"></div>
+        <div><label class="field" for="calc-hang400">400 Punkte bei</label><input type="text" id="calc-hang400" inputmode="decimal" placeholder="65"></div>
+      </div>
+      <h3>1000-m-Lauf (min:sek)</h3>
+      <p class="std-hint">Standard: 6:30 = 100 P · 3:45 = 400 P</p>
+      <div class="row2">
+        <div><label class="field">100 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run100-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run100-sec" placeholder="sek" inputmode="numeric"></div></div>
+        <div><label class="field">400 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run400-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run400-sec" placeholder="sek" inputmode="numeric"></div></div>
+      </div>
     </div>
     <h3>Zuschläge</h3>
     <div class="row2">
@@ -1632,23 +1666,68 @@ function calcFormulas(calc){
 
 /* ---------- Editor für eigene Berechnungen ---------- */
 let calcEditId = null;
+let calcMode = "formula";
+function calcNf(x, dec){ dec = dec == null ? 4 : dec; const f = Math.pow(10, dec); return (Math.round(x * f) / f).toString().replace(".", ","); }
+function calcFillFormula(A){
+  const sb = 300 / (A.sprint.p100 - A.sprint.p400), hb = 300 / (A.hang.p400 - A.hang.p100), rc = 300 / (A.run.p100 - A.run.p400);
+  $("calc-s-a").value = calcNf(100 + sb * A.sprint.p100, 3); $("calc-s-b").value = calcNf(sb, 3);
+  $("calc-h-a").value = calcNf(100 - hb * A.hang.p100, 3); $("calc-h-b").value = calcNf(hb, 3);
+  $("calc-r-ref").value = calcNf(A.run.p100, 1); $("calc-r-c").value = calcNf(rc, 8);
+}
+function calcFillSimple(A){
+  $("calc-sprint100").value = calcNf(A.sprint.p100, 1); $("calc-sprint400").value = calcNf(A.sprint.p400, 1);
+  $("calc-hang100").value = calcNf(A.hang.p100, 1); $("calc-hang400").value = calcNf(A.hang.p400, 1);
+  $("calc-run100-min").value = Math.floor(Math.round(A.run.p100) / 60); $("calc-run100-sec").value = Math.round(A.run.p100) % 60;
+  $("calc-run400-min").value = Math.floor(Math.round(A.run.p400) / 60); $("calc-run400-sec").value = Math.round(A.run.p400) % 60;
+}
+function calcReadFormula(){
+  const sa = parseNum($("calc-s-a").value), sb = parseNum($("calc-s-b").value);
+  const ha = parseNum($("calc-h-a").value), hb = parseNum($("calc-h-b").value);
+  const rref = parseNum($("calc-r-ref").value), rc = parseNum($("calc-r-c").value);
+  const err = [];
+  if (!(sb > 0) || !(sa > 400)) err.push("Sprinttest: A muss größer als 400 und B größer als 0 sein.");
+  if (!(hb > 0) || !(ha < 100)) err.push("Klimmhang: B muss größer als 0 und A kleiner als 100 sein.");
+  if (!(rc > 0) || !(rref > 300 / (rc || 1))) err.push("1000-m-Lauf: C muss größer als 0 und die Referenzzeit ausreichend groß sein.");
+  if (err.length) return { err };
+  return { anchors: { sprint:{p100:(sa-100)/sb,p400:(sa-400)/sb}, hang:{p100:(100-ha)/hb,p400:(400-ha)/hb}, run:{p100:rref,p400:rref-300/rc} } };
+}
+function calcReadSimple(){
+  const s100 = parseNum($("calc-sprint100").value), s400 = parseNum($("calc-sprint400").value);
+  const h100 = parseNum($("calc-hang100").value), h400 = parseNum($("calc-hang400").value);
+  const r100 = (parseNum($("calc-run100-min").value) || 0) * 60 + (parseNum($("calc-run100-sec").value) || 0);
+  const r400 = (parseNum($("calc-run400-min").value) || 0) * 60 + (parseNum($("calc-run400-sec").value) || 0);
+  const err = [];
+  if (!(s100 > 0) || !(s400 > 0) || s400 >= s100) err.push("Sprinttest: die 400-Punkte-Zeit muss kleiner sein als die 100-Punkte-Zeit.");
+  if (!(h100 >= 0) || !(h400 > h100)) err.push("Klimmhang: der 400-Punkte-Wert muss größer sein als der 100-Punkte-Wert.");
+  if (!(r100 > 0) || !(r400 > 0) || r400 >= r100) err.push("1000-m-Lauf: die 400-Punkte-Zeit muss kleiner sein als die 100-Punkte-Zeit.");
+  if (err.length) return { err };
+  return { anchors: { sprint:{p100:s100,p400:s400}, hang:{p100:h100,p400:h400}, run:{p100:r100,p400:r400} } };
+}
+function calcSetMode(m){
+  calcMode = m;
+  $("calc-formula-fields").style.display = m === "formula" ? "" : "none";
+  $("calc-simple-fields").style.display = m === "simple" ? "" : "none";
+  $("calc-mode").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === m));
+}
+$("calc-mode").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  const target = b.dataset.v;
+  if (target === calcMode) return;
+  const cur = calcMode === "formula" ? calcReadFormula() : calcReadSimple();
+  if (cur.anchors){ if (target === "formula") calcFillFormula(cur.anchors); else calcFillSimple(cur.anchors); }
+  calcSetMode(target);
+}));
 function openCalcEditor(id){
   calcEditId = id || null;
   const c = id ? Calc.get(id) : null;
   const A = c ? c.anchors : Calc.STANDARD.anchors;
   $("calc-title").textContent = c ? "Berechnung bearbeiten" : "Eigene Berechnung";
   $("calc-name").value = c ? c.name : "";
-  const n = x => (Math.round(x * 100000) / 100000).toString().replace(".", ",");
   if (!c || c.id === "standard"){
-    $("calc-s-a").value = "1100"; $("calc-s-b").value = "16,667";
-    $("calc-h-a").value = "75"; $("calc-h-b").value = "5";
-    $("calc-r-ref").value = "390"; $("calc-r-c").value = "1,81818181";
-  } else {
-    const sb = 300 / (A.sprint.p100 - A.sprint.p400), hb = 300 / (A.hang.p400 - A.hang.p100), rc = 300 / (A.run.p100 - A.run.p400);
-    $("calc-s-a").value = n(100 + sb * A.sprint.p100); $("calc-s-b").value = n(sb);
-    $("calc-h-a").value = n(100 - hb * A.hang.p100); $("calc-h-b").value = n(hb);
-    $("calc-r-ref").value = n(A.run.p100); $("calc-r-c").value = n(rc);
-  }
+    $("calc-s-a").value = "1100"; $("calc-s-b").value = "16,667"; $("calc-h-a").value = "75"; $("calc-h-b").value = "5"; $("calc-r-ref").value = "390"; $("calc-r-c").value = "1,81818181";
+    $("calc-sprint100").value = "60"; $("calc-sprint400").value = "42"; $("calc-hang100").value = "5"; $("calc-hang400").value = "65";
+    $("calc-run100-min").value = 6; $("calc-run100-sec").value = 30; $("calc-run400-min").value = 3; $("calc-run400-sec").value = 45;
+  } else { calcFillFormula(A); calcFillSimple(A); }
+  calcSetMode("formula");
   const S = (c && c.surch) ? c.surch : Calc.STANDARD.surch;
   $("calc-gs").value = String(Math.round(S.gS * 1000) / 10).replace(".", ",");
   $("calc-gh").value = String(Math.round(S.gH * 1000) / 10).replace(".", ",");
@@ -1660,24 +1739,15 @@ function openCalcEditor(id){
 }
 $("calc-save").addEventListener("click", () => {
   const name = $("calc-name").value.trim();
-  const sa = parseNum($("calc-s-a").value), sb = parseNum($("calc-s-b").value);
-  const ha = parseNum($("calc-h-a").value), hb = parseNum($("calc-h-b").value);
-  const rref = parseNum($("calc-r-ref").value), rc = parseNum($("calc-r-c").value);
+  const res = calcMode === "formula" ? calcReadFormula() : calcReadSimple();
   const gs = parseNum($("calc-gs").value), gh = parseNum($("calc-gh").value), gr = parseNum($("calc-gr").value), ag = parseNum($("calc-age").value);
   const err = [];
   if (!name) err.push("Bitte einen Namen angeben.");
-  if (!(sb > 0) || !(sa > 400)) err.push("Sprinttest: A muss größer als 400 und B größer als 0 sein.");
-  if (!(hb > 0) || !(ha < 100)) err.push("Klimmhang: B muss größer als 0 und A kleiner als 100 sein.");
-  if (!(rc > 0) || !(rref > 300 / (rc || 1))) err.push("1000-m-Lauf: C muss größer als 0 und die Referenzzeit ausreichend groß sein.");
+  if (res.err) err.push(...res.err);
   if ([gs, gh, gr, ag].some(v => v == null || v < 0)) err.push("Zuschläge müssen 0 oder größer sein (in Prozent).");
   if (err.length){ $("calc-err").style.display = "block"; $("calc-err").innerHTML = err.join("<br>"); return; }
-  const anchors = {
-    sprint: { p100: (sa - 100) / sb, p400: (sa - 400) / sb },
-    hang:   { p100: (100 - ha) / hb, p400: (400 - ha) / hb },
-    run:    { p100: rref, p400: rref - 300 / rc }
-  };
   const id = calcEditId || ("c" + Date.now().toString(36));
-  Calc.saveCustom({ id, name, anchors, surch: { gS: gs/100, gH: gh/100, gR: gr/100, age: ag/100 } });
+  Calc.saveCustom({ id, name, anchors: res.anchors, surch: { gS: gs/100, gH: gh/100, gR: gr/100, age: ag/100 } });
   Calc.setActive(id);
   closeModal("modal-calc");
   onCalcChanged();
