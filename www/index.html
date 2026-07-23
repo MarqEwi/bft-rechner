@@ -756,7 +756,7 @@
     <h2>★ Premium – einmalig 2,99 €</h2>
     <ul>
       <li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg> Keine Werbung</li>
-      <li><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg> Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 5)</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg> Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 3)</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Ergebnisliste als PDF, Bild oder Text exportieren</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg> Unterstützt die Weiterentwicklung</li>
     </ul>
@@ -1016,7 +1016,7 @@ function load(key, fallback){
 /* ---------- Edition (zentraler free/premium-Schalter) ---------- */
 const Edition = {
   KEY: "bft_edition",
-  FREE_LIMIT: 5,
+  FREE_LIMIT: 3,
   get(){ return load(this.KEY, "free") === "premium" ? "premium" : "free"; },
   isPremium(){ return this.get() === "premium"; },
   set(v){ store(this.KEY, v === "premium" ? "premium" : "free"); this.apply(); },
