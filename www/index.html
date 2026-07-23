@@ -699,19 +699,19 @@
     <div id="calc-simple-fields" style="display:none">
       <p class="formula-hint">Lege je Disziplin fest, welche Leistung 100 Punkte (Mindestanforderung) und welche 400 Punkte (Bestwert) ergibt. Zwischenwerte werden linear berechnet.</p>
       <h3>11 × 10 m-Sprinttest (Sekunden)</h3>
-      <p class="std-hint">Standard: 60 s = 100 P · 42 s = 400 P</p>
+      <p class="std-hint">Standard: 60 s = 100 P | 42 s = 400 P</p>
       <div class="row2">
         <div><label class="field" for="calc-sprint100">100 Punkte bei</label><input type="text" id="calc-sprint100" inputmode="decimal" placeholder="60"></div>
         <div><label class="field" for="calc-sprint400">400 Punkte bei</label><input type="text" id="calc-sprint400" inputmode="decimal" placeholder="42"></div>
       </div>
       <h3>Klimmhang (Sekunden)</h3>
-      <p class="std-hint">Standard: 5 s = 100 P · 65 s = 400 P</p>
+      <p class="std-hint">Standard: 5 s = 100 P | 65 s = 400 P</p>
       <div class="row2">
         <div><label class="field" for="calc-hang100">100 Punkte bei</label><input type="text" id="calc-hang100" inputmode="decimal" placeholder="5"></div>
         <div><label class="field" for="calc-hang400">400 Punkte bei</label><input type="text" id="calc-hang400" inputmode="decimal" placeholder="65"></div>
       </div>
       <h3>1000-m-Lauf (min:sek)</h3>
-      <p class="std-hint">Standard: 6:30 = 100 P · 3:45 = 400 P</p>
+      <p class="std-hint">Standard: 6:30 = 100 P | 3:45 = 400 P</p>
       <div class="row2">
         <div><label class="field">100 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run100-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run100-sec" placeholder="sek" inputmode="numeric"></div></div>
         <div><label class="field">400 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run400-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run400-sec" placeholder="sek" inputmode="numeric"></div></div>
@@ -1608,9 +1608,9 @@ function renderBerechnung(){
     ? '<p class="muted" style="font-size:.82rem">Quelle: vom Nutzer angelegte Berechnung.</p>'
     : '<p class="muted" style="font-size:.82rem">' + esc(Calc.SOURCE) + "</p>";
   html += '<details class="subdetails"><summary>Vereinfachte Berechnung / Darstellung</summary>'
-    + '<div class="calc-line"><b>Sprinttest</b><span>' + fmtSec(A.sprint.p100) + " = 100 P · " + fmtSec(A.sprint.p400) + " = 400 P</span></div>"
-    + '<div class="calc-line"><b>Klimmhang</b><span>' + A.hang.p100 + " s = 100 P · " + A.hang.p400 + " s = 400 P</span></div>"
-    + '<div class="calc-line"><b>Ausdauer</b><span>' + runL(A.run.p100) + " = 100 P · " + runL(A.run.p400) + " = 400 P</span></div>"
+    + '<div class="calc-line"><b>Sprinttest</b><span>' + fmtSec(A.sprint.p100) + " = 100 P | " + fmtSec(A.sprint.p400) + " = 400 P</span></div>"
+    + '<div class="calc-line"><b>Klimmhang</b><span>' + A.hang.p100 + " s = 100 P | " + A.hang.p400 + " s = 400 P</span></div>"
+    + '<div class="calc-line"><b>Ausdauer</b><span>' + runL(A.run.p100) + " = 100 P | " + runL(A.run.p400) + " = 400 P</span></div>"
     + '<p class="muted" style="font-size:.82rem">Zwischenwerte linear. Note je Disziplin (100 P = ausreichend · 200 = zufriedenstellend · 300 = gut · ab 400 = sehr gut); Gesamtnote = Mittelwert der drei Disziplin-Noten (zwei Nachkommastellen).</p>'
     + "</details>";
   if (custom) html += '<div class="btn-row"><button class="btn secondary" id="s-calc-reset">Berechnung auf Standard zurücksetzen</button></div>';
