@@ -1,6 +1,6 @@
 {
-  "name": "BFT Rechner",
-  "short_name": "BFT Rechner",
+  "name": "BFT Tool – Basis Fitness Test",
+  "short_name": "BFT Tool",
   "description": "Punkterechner für den Basis-Fitness-Test: Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen.",
   "lang": "de",
   "start_url": "./",

@@ -1,4 +1,4 @@
-# BFT Rechner (inoffiziell)
+# BFT Tool – Basis Fitness Test (inoffiziell)
 
 Punkterechner für den **Basis-Fitness-Test (BFT)**: 11×10-m-Sprinttest, Klimmhang und
 1000-m-Lauf (oder Fahrradergometer 3000 m) eingeben – die App berechnet Punkte, Gesamtergebnis
@@ -11,9 +11,9 @@ und Note.
 
 - **Teilnehmer-Modus:** Leistungen eingeben, Punkte/Note live sehen, Verlauf lokal speichern
 - **Prüfermodus:** mehrere Teilnehmer erfassen, Ergebnisliste mit bestanden/nicht bestanden,
-  Aufbau- und Durchführungsanleitung für alle drei Stationen, Drucken, CSV-Export (Premium)
+  Aufbau- und Durchführungsanleitung für alle drei Stationen, Drucken, Export als PDF/Bild/Text (Premium)
 - **Editionen:** Freie Version (mit Werbe-Platzhalter, max. 5 Teilnehmer) und Premium
-  (2,99 €: werbefrei, unbegrenzt Teilnehmer, CSV-Export)
+  (2,99 €: werbefrei, unbegrenzt Teilnehmer, Export als PDF/Bild/Text)
 - Helles Design mit Dark Mode, responsiv, Ersteinrichtungs-Dialog
 - Komplett offline-fähig, alle Daten bleiben lokal auf dem Gerät (kein Server, kein Tracking)
 
