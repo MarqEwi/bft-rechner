@@ -60,6 +60,11 @@
   .view > h2{display:inline-block;background:var(--panel);padding:5px 14px;border-radius:11px}
   .on-bg{background:var(--panel);border-radius:10px;padding:8px 12px}
   .soft-note{background:var(--panel-soft);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 13px}
+  .info-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+    font:inherit;font-size:.9rem;font-weight:600;color:var(--text);padding:12px 14px}
+  .info-row span{flex:1}
+  .info-row .ic{width:22px;height:22px;color:var(--accent2);flex:none}
+  .info-row:hover{border-color:var(--accent)}
   h3{font-size:1.02rem;margin:1rem 0 .4rem}
   p{margin:.4rem 0}
   .muted{color:var(--text2);font-size:.86rem}
@@ -292,7 +297,10 @@
       <div class="qf"><button class="qf-info" data-info="hang" aria-label="Infos zum Klimmhang"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>Klimmhang</b>min. 5 s<br>(= 100 Punkte)</div>
       <div class="qf"><button class="qf-info" data-info="run" aria-label="Infos zum 1000-m-Lauf und Fahrradergometer"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>1000-m-Lauf / FET 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
     </div>
-    <p class="muted soft-note" style="margin-top:12px">In jeder Disziplin sind mindestens 100 Punkte nötig, sonst gilt der Test als nicht bestanden. Gesamtnote aus der Punktsumme aller drei Disziplinen.</p>
+    <button class="soft-note info-row" data-info="allgemein" style="margin-top:12px">
+      <span>Allgemeine Informationen zum BFT – Basis Fitness Test</span>
+      <svg class="ic" aria-hidden="true"><use href="#i-info"/></svg>
+    </button>
   </section>
 
   <!-- ===== Teilnehmer ===== -->
@@ -877,9 +885,32 @@ const DISC_INFO = {
       '<li>Zu schneller Start und Einbruch auf der zweiten Hälfte – Tempo gleichmäßig einteilen</li>' +
       '<li>Beim FET die Trittfrequenz unter die Vorgabe fallen lassen</li>' +
       '<li>Ohne Erwärmung starten</li></ul>'
+  },
+  allgemein: {
+    title: "Allgemeine Informationen zum BFT",
+    html: '<span class="tag">Was ist der BFT?</span><ul>' +
+      '<li>Der Basis-Fitness-Test (BFT) prüft die grundlegende körperliche Leistungsfähigkeit anhand von Schnelligkeit, Kraft und Ausdauer</li>' +
+      '<li>Er besteht aus drei Disziplinen: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (bzw. Fahrradergometer, FET 3000 m)</li>' +
+      '<li>Er wird u. a. von Bewerbenden für die Laufbahn Soldat auf Zeit abgelegt; aktive Soldatinnen und Soldaten wiederholen ihn regelmäßig</li></ul>' +
+      '<span class="tag">Bewertung &amp; Note</span><ul>' +
+      '<li>In jeder Disziplin sind mindestens 100 Punkte nötig – wird eine verfehlt, gilt der Test als nicht bestanden</li>' +
+      '<li>Je Disziplin sind bis zu 400 Punkte üblich (in dieser App bis 500 gedeckelt)</li>' +
+      '<li>Die Gesamtnote ergibt sich aus der Punktsumme aller drei Disziplinen: ab 300 ausreichend, ab 600 befriedigend, ab 900 gut, ab 1200 sehr gut</li>' +
+      '<li>Diese App zeigt zusätzlich eine Dezimalnote (z. B. 1,0 = sehr gut … 5,0 = nicht bestanden)</li></ul>' +
+      '<span class="tag">Zuschläge</span><ul>' +
+      '<li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang</li>' +
+      '<li>Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht (in der App abschaltbar)</li>' +
+      '<li>Die Mindestanforderungen (60 s / 5 s / 6:30 min) gelten unverändert für alle</li></ul>' +
+      '<span class="tag">Ablauf</span><ul>' +
+      '<li>Die drei Disziplinen werden nacheinander in fester Reihenfolge absolviert (Sprint → Klimmhang → Ausdauer)</li>' +
+      '<li>Für alle drei zusammen stehen insgesamt 90 Minuten zur Verfügung</li>' +
+      '<li>Abbruch oder Überschreiten der Maximalzeit einer Disziplin bedeutet, dass der Test insgesamt nicht bestanden ist</li>' +
+      '<li>Details zu jeder Station findest du über das Info-Symbol an den Disziplin-Kacheln sowie im Prüfermodus unter „Aufbau &amp; Ablauf“</li></ul>' +
+      '<span class="tag">Hinweis</span><ul>' +
+      '<li>Diese App ist ein inoffizielles, privates Projekt und kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr – maßgeblich ist stets die offizielle Wertung.</li></ul>'
   }
 };
-document.querySelectorAll(".qf-info").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll("[data-info]").forEach(b => b.addEventListener("click", () => {
   const info = DISC_INFO[b.dataset.info];
   if (!info) return;
   document.getElementById("info-title").textContent = info.title;
