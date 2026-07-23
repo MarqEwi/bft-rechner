@@ -5,3 +5,10 @@ android/build/
 android/local.properties
 android/.idea/
 android/app/release/
+android/capacitor-cordova-android-plugins/build/
+
+# Signierung & Secrets – niemals ins Git!
+keystore.properties
+*.keystore
+*.jks
+android/app/google-services.json
