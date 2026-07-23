@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BFT Rechner – Basis-Fitness-Test Punkterechner</title>
+<title>BFT Tool – Basis Fitness Test</title>
 <meta name="description" content="Punkterechner für den Basis-Fitness-Test (BFT): 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen. Mit Prüfermodus für Gruppen.">
 <meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#171a14" media="(prefers-color-scheme: dark)">
@@ -90,7 +90,12 @@
   .mode-card span{color:var(--text2);font-size:.86rem}
   .quickfacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
   @media(max-width:520px){.quickfacts{grid-template-columns:1fr}}
-  .quickfacts .qf{background:var(--panel);border-radius:10px;padding:10px;font-size:.8rem;color:var(--text2)}
+  .quickfacts .qf{background:var(--panel);border-radius:10px;padding:10px 36px 10px 10px;font-size:.8rem;color:var(--text2);position:relative}
+  .qf-info{position:absolute;top:7px;right:7px;background:none;border:none;color:var(--accent2);cursor:pointer;padding:3px;line-height:0}
+  .qf-info .ic{width:21px;height:21px}
+  #info-content .tag{margin-top:8px}
+  #info-content ul{margin:.3rem 0 .5rem;padding-left:1.2rem}
+  #info-content li{margin:.22rem 0;font-size:.9rem}
   .quickfacts .qf b{display:block;color:var(--text);font-size:.9rem}
   /* Formulare */
   label.field{display:block;margin:10px 0 2px;font-size:.86rem;color:var(--text2);font-weight:600}
@@ -246,11 +251,12 @@
   </symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"/><path d="M14.5 6.5l3 3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></symbol>
 </svg>
 
 <header class="app">
-  <img class="logo" src="data:image/png;base64,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" alt="BFT Rechner Logo">
-  <h1>BFT Rechner<span class="sub">Basis-Fitness-Test · Punkte &amp; Noten</span></h1>
+  <img class="logo" src="data:image/png;base64,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" alt="BFT Tool Logo">
+  <h1>BFT Tool<span class="sub">Basis-Fitness-Test · Punkte &amp; Noten</span></h1>
   <span class="spacer"></span>
   <button class="iconbtn" id="btn-settings" aria-label="Einstellungen" title="Einstellungen"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></button>
 </header>
@@ -273,9 +279,9 @@
       </button>
     </div>
     <div class="quickfacts">
-      <div class="qf"><b>11×10-m-Sprinttest</b>max. 60,0 s<br>(= 100 Punkte)</div>
-      <div class="qf"><b>Klimmhang</b>min. 5 s<br>(= 100 Punkte)</div>
-      <div class="qf"><b>1000-m-Lauf / FET 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
+      <div class="qf"><button class="qf-info" data-info="sprint" aria-label="Infos zum Sprinttest"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>11×10-m-Sprinttest</b>max. 60,0 s<br>(= 100 Punkte)</div>
+      <div class="qf"><button class="qf-info" data-info="hang" aria-label="Infos zum Klimmhang"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>Klimmhang</b>min. 5 s<br>(= 100 Punkte)</div>
+      <div class="qf"><button class="qf-info" data-info="run" aria-label="Infos zum 1000-m-Lauf und Fahrradergometer"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>1000-m-Lauf / FET 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
     </div>
     <p class="muted on-bg" style="margin-top:12px">In jeder Disziplin sind mindestens 100 Punkte nötig, sonst gilt der Test als nicht bestanden. Gesamtnote aus der Punktsumme aller drei Disziplinen.</p>
   </section>
@@ -370,7 +376,7 @@
     <div id="pruefer-tab-erfassen">
       <div class="btn-row">
         <button class="btn" id="p-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Teilnehmer hinzufügen</button>
-        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> CSV-Export <span class="premium-star" id="p-export-star">★</span></button>
+        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export <span class="premium-star" id="p-export-star">★</span></button>
         <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Drucken</button>
         <button class="btn danger small" id="p-clear" style="margin-left:auto">Liste leeren</button>
       </div>
@@ -499,12 +505,21 @@
   <a href="datenschutz.html">Datenschutz &amp; Impressum</a> · <a href="#" id="foot-sources">Quellen</a>
 </footer>
 
+<!-- ===== Disziplin-Infos ===== -->
+<div class="modal-back" id="modal-info">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Disziplin-Informationen">
+    <button class="iconbtn x" data-close="modal-info" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <h2 id="info-title">Info</h2>
+    <div id="info-content"></div>
+  </div>
+</div>
+
 <!-- ===== Onboarding ===== -->
 <div class="modal-back" id="modal-onboarding">
   <div class="modal" role="dialog" aria-modal="true" aria-label="Einführung">
     <div class="ob-step active" data-step="0">
       <div class="emoji"><svg class="ic" aria-hidden="true"><use href="#i-medal"/></svg></div>
-      <h2>Willkommen beim BFT Rechner!</h2>
+      <h2>Willkommen beim BFT Tool!</h2>
       <p>Berechne Punkte und Note für den Basis-Fitness-Test: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (oder Fahrradergometer).</p>
     </div>
     <div class="ob-step" data-step="1">
@@ -545,7 +560,7 @@
       <button class="btn secondary" id="s-onboarding">Einführung erneut zeigen</button>
     </div>
     <h3>Über diese App</h3>
-    <p class="muted">BFT Rechner <span id="s-version"></span> · privates Projekt von MERCwerk.
+    <p class="muted">BFT Tool <span id="s-version"></span> · privates Projekt von MERCwerk.
       Inoffizielle App, kein Angebot der Bundeswehr; „Basis-Fitness-Test“ wird nur beschreibend verwendet.
       Punktberechnung nach öffentlich zugänglichen Angaben, ohne Gewähr – maßgeblich ist stets die offizielle Wertung.
       Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht
@@ -569,11 +584,25 @@
     <ul>
       <li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg> Keine Werbung</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg> Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 5)</li>
-      <li><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Ergebnisliste als CSV exportieren</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Ergebnisliste als PDF, Bild oder Text exportieren</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg> Unterstützt die Weiterentwicklung</li>
     </ul>
     <div id="premium-buy-area"></div>
     <p class="muted" style="font-size:.76rem">Einmaliger Kauf über Google Play, kein Abo. Der Kauf wird lokal auf dem Gerät freigeschaltet.</p>
+  </div>
+</div>
+
+<!-- ===== Export-Auswahl (Prüfermodus) ===== -->
+<div class="modal-back" id="modal-export">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Ergebnisliste exportieren">
+    <button class="iconbtn x" data-close="modal-export" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <h2>Ergebnisliste exportieren</h2>
+    <p class="muted">Wähle das Format – die Datei wird lokal gespeichert (in der App zum Speichern/Teilen).</p>
+    <div class="btn-row" style="flex-direction:column;align-items:stretch">
+      <button class="btn" id="exp-pdf"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als PDF</button>
+      <button class="btn secondary" id="exp-img"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als Bild (PNG)</button>
+      <button class="btn secondary" id="exp-txt"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als Text</button>
+    </div>
   </div>
 </div>
 
@@ -627,7 +656,7 @@
 <script>
 "use strict";
 /* =========================================================================
-   BFT Rechner – inoffizieller Punkterechner für den Basis-Fitness-Test
+   BFT Tool – inoffizieller Punkterechner für den Basis-Fitness-Test
    Alle Daten bleiben lokal (localStorage). Kein Server, kein Tracking.
    ========================================================================= */
 
@@ -762,10 +791,20 @@ const Bridge = {
     catch(e){ return false; }
   },
   async saveTextFile(filename, text, mime){
-    if (this.isNative() && window.BftNative && window.BftNative.saveTextFile){
-      try { await window.BftNative.saveTextFile(filename, text, mime); return; } catch(e){ /* Fallback unten */ }
+    await this.saveBlob(filename, new Blob([text], { type: mime + ";charset=utf-8" }));
+  },
+  async saveBlob(filename, blob){
+    /* In der App (Capacitor): über Filesystem + Share speichern/teilen. */
+    if (this.isNative() && window.BftNative && window.BftNative.saveBase64){
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const fr = new FileReader();
+          fr.onload = () => res(String(fr.result).split(",")[1] || "");
+          fr.onerror = rej; fr.readAsDataURL(blob);
+        });
+        await window.BftNative.saveBase64(filename, b64, blob.type); return;
+      } catch(e){ /* Fallback unten */ }
     }
-    const blob = new Blob([text], { type: mime + ";charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = filename;
@@ -779,6 +818,65 @@ const Bridge = {
     window.print();
   }
 };
+
+/* ---------- Disziplin-Infos (Startseite) ---------- */
+const DISC_INFO = {
+  sprint: {
+    title: "11×10-m-Sprinttest",
+    html: '<span class="tag">Durchführung</span><ul>' +
+      '<li>Start in Bauchlage auf der Matte, die Hände berühren sich hinter dem Rücken</li>' +
+      '<li>Auf das Signal aufstehen, die 10 m entfernte Pylone umlaufen und zurück zur Matte sprinten</li>' +
+      '<li>Dort wieder Bauchlage einnehmen und die Hände hinter dem Rücken zusammenführen, dann weiter</li>' +
+      '<li>Insgesamt 11 Teilstrecken à 10 m – nach dem 6. Aufstehen nur noch bis zur Pylone, dort wird die Zeit gestoppt</li></ul>' +
+      '<span class="tag">Bewertung</span><ul>' +
+      '<li>Maximal 60,0 s = 100 Punkte (Mindestanforderung, „ausreichend“)</li>' +
+      '<li>48,0 s = 300 Punkte („gut“) · ab 41,99 s = 400 Punkte („sehr gut“)</li>' +
+      '<li>Frauen erhalten 15 % Leistungszuschlag, ab dem 36. Lebensjahr gibt es zusätzlich den Alterszuschlag</li></ul>' +
+      '<span class="tag">Häufige Fehler</span><ul>' +
+      '<li>Pylone nicht vollständig umlaufen oder Wendepunkt abgekürzt</li>' +
+      '<li>Bauchlage nicht korrekt eingenommen, Hände nicht hinter dem Rücken zusammengeklatscht</li>' +
+      '<li>Start vor dem Signal – die Teilstrecke zählt dann nicht</li></ul>'
+  },
+  hang: {
+    title: "Klimmhang",
+    html: '<span class="tag">Durchführung</span><ul>' +
+      '<li>Über eine Starthilfe (Kasten/Hocker) die Klimmzugstange etwa schulterbreit greifen</li>' +
+      '<li>Ausgangsposition: Kinn über der Stange – mit dem Signal wird die Starthilfe entfernt</li>' +
+      '<li>Die Position so lange wie möglich frei hängend halten</li>' +
+      '<li>Die Zeit endet, sobald das Kinn unter die Stange sinkt oder auf der Stange abgelegt wird</li></ul>' +
+      '<span class="tag">Bewertung</span><ul>' +
+      '<li>Mindestens 5 s = 100 Punkte (Mindestanforderung, „ausreichend“)</li>' +
+      '<li>45 s = 300 Punkte („gut“) · ab 65 s = 400 Punkte („sehr gut“)</li>' +
+      '<li>Frauen erhalten 40 % Leistungszuschlag, ab dem 36. Lebensjahr gibt es zusätzlich den Alterszuschlag</li></ul>' +
+      '<span class="tag">Häufige Fehler</span><ul>' +
+      '<li>Kinn auf der Stange abgelegt oder nicht dauerhaft über der Stange gehalten</li>' +
+      '<li>Starkes Schwingen oder Anschwung holen</li>' +
+      '<li>Griff rutscht durch – vorher Hände trocknen, ggf. Magnesia verwenden</li></ul>'
+  },
+  run: {
+    title: "1000-m-Lauf / Fahrradergometer (FET)",
+    html: '<span class="tag">Durchführung</span><ul>' +
+      '<li>1000-m-Lauf auf der 400-m-Bahn oder einer exakt vermessenen, ebenen Strecke</li>' +
+      '<li>Alternative je nach Vorgabe/Wetterlage: 3000 m auf dem computergestützten Fahrradergometer</li>' +
+      '<li>FET-Einstellungen: Anfangslast 130 Watt bei 80 Umdrehungen pro Minute</li>' +
+      '<li>In beiden Varianten gilt die Maximalzeit von 6:30 min</li></ul>' +
+      '<span class="tag">Bewertung</span><ul>' +
+      '<li>6:30 min = 100 Punkte (Mindestanforderung, „ausreichend“)</li>' +
+      '<li>4:30 min = 300 Punkte („gut“) · ab 3:30 min = 400 Punkte („sehr gut“)</li>' +
+      '<li>Frauen erhalten 15 % Leistungszuschlag, ab dem 36. Lebensjahr gibt es zusätzlich den Alterszuschlag</li></ul>' +
+      '<span class="tag">Häufige Fehler</span><ul>' +
+      '<li>Zu schneller Start und Einbruch auf der zweiten Hälfte – Tempo gleichmäßig einteilen</li>' +
+      '<li>Beim FET die Trittfrequenz unter die Vorgabe fallen lassen</li>' +
+      '<li>Ohne Erwärmung starten</li></ul>'
+  }
+};
+document.querySelectorAll(".qf-info").forEach(b => b.addEventListener("click", () => {
+  const info = DISC_INFO[b.dataset.info];
+  if (!info) return;
+  document.getElementById("info-title").textContent = info.title;
+  document.getElementById("info-content").innerHTML = info.html;
+  openModal("modal-info");
+}));
 
 /* ---------- Navigation ---------- */
 function show(view){
@@ -992,30 +1090,149 @@ $("e-save").addEventListener("click", () => {
   renderPruefer();
 });
 
-/* CSV-Export (Premium) – deutsches Format: Semikolon, BOM für Excel */
-$("p-export").addEventListener("click", async () => {
-  if (!Edition.isPremium()){ openPremium(); return; }
+/* ---------- Export (Premium): PDF / Bild / Text ---------- */
+function dateStamp(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function dateStr(){ return new Date().toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit",year:"numeric"}); }
+
+/* Baut Kopf + Zeilen der Ergebnisliste (rein textuelle Werte) */
+function exportRows(){
   const list = participants();
-  if (!list.length){ alert("Die Teilnehmerliste ist leer."); return; }
-  let csv = "﻿Name;Wertung;Alter;Sprinttest (s);Klimmhang (s);Ausdauer;Ausdauerzeit;Punkte Sprint;Punkte Klimmhang;Punkte Ausdauer;Gesamtpunkte;Note;Note (Zahl);Status\r\n";
-  list.forEach(p => {
+  const head = ["Name","Wtg","Alter","Sprint","Klimm","Ausdauer","Punkte","Note","Status"];
+  const rows = list.map(p => {
     const r = BFT.evaluate(p);
-    csv += [
-      '"' + (p.name || "").replace(/"/g, '""') + '"',
-      p.sex === "w" ? "F" : "M", p.age ?? "",
-      p.sprint != null ? String(p.sprint).replace(".", ",") : "",
-      p.hang != null ? String(p.hang).replace(".", ",") : "",
-      p.runType === "fet" ? "FET 3000 m" : "1000-m-Lauf",
-      p.run != null ? fmtTime(p.run) : "",
-      r.points.sprint ?? "", r.points.hang ?? "", r.points.run ?? "",
-      r.total ?? "", r.grade ?? "", r.noteText ?? "",
+    return [
+      p.name || "-",
+      p.sex === "w" ? "F" : "M",
+      p.age != null ? String(p.age) : "-",
+      p.sprint != null ? String(p.sprint).replace(".",",") + "s" : "-",
+      p.hang != null ? String(p.hang).replace(".",",") + "s" : "-",
+      (p.run != null ? fmtTime(p.run) : "-") + (p.runType === "fet" ? " FET" : ""),
+      r.total != null ? String(r.total) : "-",
+      r.grade ? (r.grade + (r.noteText ? " (" + r.noteText + ")" : "")) : "-",
       !r.complete ? "unvollständig" : (r.allPass ? "bestanden" : "nicht bestanden")
-    ].join(";") + "\r\n";
+    ];
   });
-  const d = new Date();
-  const stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  await Bridge.saveTextFile("bft-ergebnisliste-" + stamp + ".csv", csv, "text/csv");
+  return { head, rows };
+}
+function colWidths(head, rows){ return head.map((hh,i) => Math.max(hh.length, ...rows.map(r => r[i].length))); }
+
+/* Export als Text (.txt) */
+function exportText(){
+  const { head, rows } = exportRows();
+  if (!rows.length){ alert("Die Teilnehmerliste ist leer."); return; }
+  const w = colWidths(head, rows);
+  const fmt = cells => cells.map((c,i) => c.padEnd(w[i])).join("  ");
+  let txt = "BFT Tool – Ergebnisliste (Basis-Fitness-Test)\n";
+  txt += "Erstellt: " + dateStr() + "\n\n";
+  txt += fmt(head) + "\n";
+  txt += w.map(x => "-".repeat(x)).join("  ") + "\n";
+  rows.forEach(r => txt += fmt(r) + "\n");
+  txt += "\nInoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.\n";
+  Bridge.saveTextFile("bft-ergebnisliste-" + dateStamp() + ".txt", txt, "text/plain");
+  closeModal("modal-export");
+}
+
+/* Export als Bild (PNG) – auf Canvas gezeichnete Tabelle */
+function exportImage(){
+  const { head, rows } = exportRows();
+  if (!rows.length){ alert("Die Teilnehmerliste ist leer."); return; }
+  const DPR = 2, padX = 26, rowH = 34, titleH = 92, footH = 44;
+  const fBody = "16px system-ui, Arial, sans-serif", fHead = "600 16px system-ui, Arial, sans-serif";
+  const meas = document.createElement("canvas").getContext("2d");
+  meas.font = fBody;
+  const w = head.map((hh,i) => {
+    meas.font = fHead; let mx = meas.measureText(hh).width;
+    meas.font = fBody; rows.forEach(r => { mx = Math.max(mx, meas.measureText(r[i]).width); });
+    return Math.ceil(mx) + 22;
+  });
+  const tableW = w.reduce((a,b) => a+b, 0);
+  const totalW = tableW + padX*2;
+  const totalH = titleH + rowH*(rows.length + 1) + footH;
+  const cv = document.createElement("canvas");
+  cv.width = totalW*DPR; cv.height = totalH*DPR;
+  const ctx = cv.getContext("2d"); ctx.scale(DPR, DPR);
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,totalW,totalH);
+  ctx.fillStyle = "#3f4a33"; ctx.font = "700 24px system-ui, Arial, sans-serif";
+  ctx.fillText("BFT Tool – Ergebnisliste", padX, 40);
+  ctx.fillStyle = "#5b6152"; ctx.font = "14px system-ui, Arial, sans-serif";
+  ctx.fillText("Basis-Fitness-Test · Erstellt: " + dateStr(), padX, 66);
+  let y = titleH;
+  // Kopfzeile
+  ctx.fillStyle = "#4a5d3a"; ctx.fillRect(padX, y, tableW, rowH);
+  ctx.fillStyle = "#ffffff"; ctx.font = fHead; ctx.textBaseline = "middle";
+  let x = padX;
+  head.forEach((hh,i) => { ctx.fillText(hh, x + 11, y + rowH/2); x += w[i]; });
+  y += rowH;
+  // Datenzeilen
+  rows.forEach((r, ri) => {
+    ctx.fillStyle = ri % 2 ? "#eef1e7" : "#f7f8f3"; ctx.fillRect(padX, y, tableW, rowH);
+    x = padX; ctx.font = fBody;
+    r.forEach((c,i) => {
+      ctx.fillStyle = (i === 8 && c === "nicht bestanden") ? "#c62828" : "#20241c";
+      ctx.fillText(c, x + 11, y + rowH/2); x += w[i];
+    });
+    y += rowH;
+  });
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#5b6152"; ctx.font = "12px system-ui, Arial, sans-serif";
+  ctx.fillText("Inoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.", padX, y + 26);
+  cv.toBlob(blob => { Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".png", blob); }, "image/png");
+  closeModal("modal-export");
+}
+
+/* Export als PDF – schlanker, selbstgebauter PDF-Writer (Courier, WinAnsi) */
+const WINANSI = {"ä":0xE4,"ö":0xF6,"ü":0xFC,"Ä":0xC4,"Ö":0xD6,"Ü":0xDC,"ß":0xDF,"–":0x96,"—":0x97,"…":0x85,"·":0xB7,"×":0xD7,"€":0x80,"„":0x84,"“":0x93,"”":0x94,"’":0x92,"‚":0x82};
+function encWinAnsi(s){ let o = ""; for (const ch of s){ const c = ch.charCodeAt(0); if (c >= 32 && c <= 126) o += ch; else if (WINANSI[ch] != null) o += String.fromCharCode(WINANSI[ch]); else o += "?"; } return o; }
+function pdfEsc(s){ return s.replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)"); }
+function buildPdf(lines){
+  const size = 10, lh = 13, left = 40, top = 800;
+  const perPage = Math.floor((top - 40) / lh);
+  const pages = [];
+  for (let i = 0; i < Math.max(lines.length, 1); i += perPage) pages.push(lines.slice(i, i + perPage));
+  const obj = []; // obj[n] = Inhalt von Objekt n
+  obj[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  obj[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>";
+  let num = 4; const kids = [];
+  pages.forEach(pageLines => {
+    let y = top, cs = "BT /F1 " + size + " Tf\n";
+    pageLines.forEach(ln => { cs += "1 0 0 1 " + left + " " + y + " Tm (" + pdfEsc(encWinAnsi(ln)) + ") Tj\n"; y -= lh; });
+    cs += "ET";
+    const contentNum = num;
+    obj[contentNum] = "<< /Length " + cs.length + " >>\nstream\n" + cs + "\nendstream"; num++;
+    const pageNum = num;
+    obj[pageNum] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents " + contentNum + " 0 R >>";
+    kids.push(pageNum + " 0 R"); num++;
+  });
+  obj[2] = "<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + pages.length + " >>";
+  let pdf = "%PDF-1.4\n"; const off = [];
+  for (let i = 1; i < num; i++){ off[i] = pdf.length; pdf += i + " 0 obj\n" + obj[i] + "\nendobj\n"; }
+  const xref = pdf.length;
+  pdf += "xref\n0 " + num + "\n0000000000 65535 f \n";
+  for (let i = 1; i < num; i++) pdf += String(off[i]).padStart(10,"0") + " 00000 n \n";
+  pdf += "trailer\n<< /Size " + num + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF";
+  return pdf;
+}
+function strToBlob(s, mime){ const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 0xff; return new Blob([b], { type: mime }); }
+function exportPdf(){
+  const { head, rows } = exportRows();
+  if (!rows.length){ alert("Die Teilnehmerliste ist leer."); return; }
+  const w = colWidths(head, rows);
+  const fmt = cells => cells.map((c,i) => c.padEnd(w[i])).join("  ");
+  const lines = ["BFT Tool - Ergebnisliste (Basis-Fitness-Test)", "Erstellt: " + dateStr(), "", fmt(head), w.map(x => "-".repeat(x)).join("  ")];
+  rows.forEach(r => lines.push(fmt(r)));
+  lines.push(""); lines.push("Inoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.");
+  Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".pdf", strToBlob(buildPdf(lines), "application/pdf"));
+  closeModal("modal-export");
+}
+
+$("p-export").addEventListener("click", () => {
+  if (!Edition.isPremium()){ openPremium(); return; }
+  if (!participants().length){ alert("Die Teilnehmerliste ist leer."); return; }
+  openModal("modal-export");
 });
+$("exp-pdf").addEventListener("click", exportPdf);
+$("exp-img").addEventListener("click", exportImage);
+$("exp-txt").addEventListener("click", exportText);
 
 $("p-print").addEventListener("click", () => {
   $("view-pruefer").classList.add("print-me");
@@ -1050,7 +1267,7 @@ $("s-premium").addEventListener("click", () => { closeModal("modal-settings"); o
 function renderSettings(){
   $("s-version").textContent = "v" + APP_VERSION;
   $("s-edition-status").innerHTML = Edition.isPremium()
-    ? "★ <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, CSV-Export."
+    ? "★ <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, Export (PDF/Bild/Text)."
     : "Aktuell: <b>Freie Version</b> (mit Werbung, max. " + Edition.FREE_LIMIT + " Teilnehmer im Prüfermodus).";
 }
 $("btn-settings").addEventListener("click", () => { renderSettings(); openModal("modal-settings"); });
