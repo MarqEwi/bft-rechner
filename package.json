@@ -4,7 +4,7 @@
   "private": true,
   "description": "BFT Rechner – inoffizieller Punkterechner für den Basis-Fitness-Test (Web + spätere Capacitor-App)",
   "scripts": {
-    "sync-www": "mkdir -p www && cp index.html datenschutz.html manifest.webmanifest sw.js www/ && cp -r icons www/",
+    "sync-www": "node scripts/sync-www.mjs",
     "sync": "npm run sync-www",
     "cap:sync": "npm run sync-www && npx cap sync android",
     "cap:open": "npx cap open android"
