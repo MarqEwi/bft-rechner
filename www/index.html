@@ -88,6 +88,8 @@
   .quickfacts .qf b{display:block;color:var(--text);font-size:.9rem}
   /* Formulare */
   label.field{display:block;margin:10px 0 2px;font-size:.86rem;color:var(--text2);font-weight:600}
+  .checkline{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2);margin-top:7px;cursor:pointer}
+  .checkline input{width:17px;height:17px;accent-color:#4a5d3a}
   input[type=text],input[type=number],select{
     width:100%;padding:10px 12px;font:inherit;color:var(--text);
     background:var(--bg3);border:1px solid var(--line);border-radius:10px}
@@ -225,12 +227,13 @@
       <label class="field">Wertungsgruppe</label>
       <div class="seg" id="t-sex">
         <button data-v="m" class="active">Männer</button>
-        <button data-v="w">Frauen (mit Zuschlag)</button>
+        <button data-v="w">Frauen</button>
       </div>
       <div class="row2">
         <div>
           <label class="field" for="t-age">Alter (optional)</label>
           <input type="number" id="t-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+          <label class="checkline"><input type="checkbox" id="t-noage"> ohne Alterszuschlag</label>
         </div>
         <div>
           <label class="field" for="t-sprint">11×10-m-Sprinttest (Sekunden)</label>
@@ -411,6 +414,7 @@
             <li>Vorzeitiger Abbruch einer Disziplin oder Überschreiten der Maximalzeit → Test insgesamt nicht bestanden</li>
             <li>In jeder Disziplin sind mindestens 100 Punkte erforderlich</li>
             <li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang (Mindestanforderungen gelten unverändert für alle)</li>
+            <li>Alterszuschlag: ab dem vollendeten 36. Lebensjahr wird die erreichte Punktzahl um 0,5 % pro Lebensjahr erhöht</li>
             <li>Bewerbende können den BFT bei Nichtbestehen nach 6 Monaten wiederholen; Soldatinnen und Soldaten absolvieren ihn jährlich</li>
             <li>Vor Beginn: Erwärmung ermöglichen, Sportkleidung/Hallenschuhe, Gesundheitszustand erfragen</li>
           </ul>
@@ -482,7 +486,8 @@
     <p class="muted">BFT Rechner <span id="s-version"></span> · privates Projekt von MERCwerk.
       Inoffizielle App, kein Angebot der Bundeswehr; „Basis-Fitness-Test“ wird nur beschreibend verwendet.
       Punktberechnung nach öffentlich zugänglichen Angaben, ohne Gewähr – maßgeblich ist stets die offizielle Wertung.
-      Ein Alterszuschlag ist offiziell vorgesehen, in dieser Version aber noch nicht enthalten (Berechnung ohne Alterszuschlag).</p>
+      Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht
+      (bis 35 kein Zuschlag); über das Häkchen „ohne Alterszuschlag“ lässt er sich abschalten.</p>
     <p class="muted"><a href="datenschutz.html">Datenschutzerklärung &amp; Impressum</a></p>
     <h3>Quellen</h3>
     <ul class="muted" style="padding-left:1.2rem;font-size:.82rem">
@@ -528,6 +533,7 @@
       <div>
         <label class="field" for="e-age">Alter (optional)</label>
         <input type="number" id="e-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+        <label class="checkline"><input type="checkbox" id="e-noage"> ohne Alterszuschlag</label>
       </div>
     </div>
     <div class="row2">
@@ -575,8 +581,11 @@
    Frauen erhalten einen Leistungszuschlag von 15 % (Sprint, Ausdauer)
    bzw. 40 % (Klimmhang) auf die erbrachte Leistung; die Mindestanforderungen
    (60 s / 5 s / 390 s) gelten unverändert für alle.
+   Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten
+   Basispunkte um 0,5 % pro Lebensjahr erhöht (bis einschließlich 35: kein
+   Zuschlag); in der Eingabe abschaltbar („ohne Alterszuschlag“).
    Punkte je Disziplin werden bei 500 gedeckelt. Ohne Gewähr – maßgeblich ist
-   die offizielle Wertung der Bundeswehr. Alterszuschlag: noch nicht enthalten.
+   die offizielle Wertung der Bundeswehr.
 --------------------------------------------------------------------------- */
 const BFT = {
   MIN:  { sprint: 60.0, hang: 5, run: 390 },
@@ -596,12 +605,20 @@ const BFT = {
     const eff = sex === "w" ? t * 0.85 : t;
     return Math.max(0, Math.min(this.CAP, Math.round(100 + (390 - eff) / 0.6)));
   },
-  evaluate({sprint, hang, run, sex}){
-    const p = {
+  ageFactor(age, noAge){
+    if (noAge || age == null || !(age > 35)) return 1;
+    return 1 + 0.005 * (Math.min(age, 90) - 35);
+  },
+  evaluate({sprint, hang, run, sex, age, noAge}){
+    const f = this.ageFactor(age, noAge);
+    const base = {
       sprint: this.sprintPoints(sprint, sex),
       hang:   this.hangPoints(hang, sex),
       run:    this.runPoints(run, sex)
     };
+    const p = {};
+    for (const k of ["sprint", "hang", "run"])
+      p[k] = base[k] == null ? null : Math.min(this.CAP, Math.round(base[k] * f));
     const pass = {
       sprint: sprint != null && sprint <= this.MIN.sprint,
       hang:   hang   != null && hang   >= this.MIN.hang,
@@ -618,7 +635,21 @@ const BFT = {
       else if (total >= 600){ grade = "befriedigend"; gradeClass = "g-befr"; }
       else { grade = "ausreichend"; gradeClass = "g-ausr"; }
     }
-    return { points: p, pass, complete, allPass, total, grade, gradeClass };
+    /* Dezimalnote passend zur Wortnote: je Notenband linear interpoliert
+       (1200 = 1,0 · 900 = 2,0 · 600 = 3,0 · 300 = 4,0 · nicht bestanden = 5,0) */
+    let noteText = null;
+    if (complete){
+      let n;
+      if (!allPass) n = 5.0;
+      else if (total >= 1200) n = 1.0;
+      else {
+        const top = total >= 900 ? 2 : total >= 600 ? 3 : 4;
+        const start = total >= 900 ? 900 : total >= 600 ? 600 : 300;
+        n = top - (total - start) / 300 * 0.9;
+      }
+      noteText = (Math.round(n * 10) / 10).toFixed(1).replace(".", ",");
+    }
+    return { points: p, pass, complete, allPass, total, grade, gradeClass, noteText };
   }
 };
 
@@ -733,6 +764,7 @@ function tRead(){
   return {
     sex: segValue("t-sex"),
     age: parseNum($("t-age").value),
+    noAge: $("t-noage").checked,
     sprint: parseNum($("t-sprint").value),
     hang: parseNum($("t-hang").value),
     runType: segValue("t-runtype"),
@@ -760,7 +792,7 @@ function tRender(){
   }
   $("t-r-total").textContent = r.total == null ? "–" : r.total;
   const g = $("t-r-grade");
-  if (r.grade){ g.style.visibility = "visible"; g.textContent = r.grade; g.className = "grade " + r.gradeClass; }
+  if (r.grade){ g.style.visibility = "visible"; g.textContent = r.grade + (r.noteText ? " (" + r.noteText + ")" : ""); g.className = "grade " + r.gradeClass; }
   else g.style.visibility = "hidden";
   const fails = [];
   if (r.complete && !r.allPass){
@@ -773,13 +805,14 @@ function tRender(){
   $("t-save").disabled = !r.complete;
 }
 ["t-age","t-sprint","t-hang","t-run-min","t-run-sec"].forEach(id => $(id).addEventListener("input", tRender));
+$("t-noage").addEventListener("change", tRender);
 segInit("t-sex", tRender);
 segInit("t-runtype", tRender);
 
 $("t-save").addEventListener("click", () => {
   if (!tCurrent || !tCurrent.r.complete) return;
   const h = load(HIST_KEY, []);
-  h.unshift({ date: Date.now(), inp: tCurrent.inp, total: tCurrent.r.total, grade: tCurrent.r.grade });
+  h.unshift({ date: Date.now(), inp: tCurrent.inp, total: tCurrent.r.total, grade: tCurrent.r.grade, note: tCurrent.r.noteText });
   store(HIST_KEY, h.slice(0, 200));
   renderHistory();
 });
@@ -795,7 +828,7 @@ function renderHistory(){
     const d = new Date(x.date);
     html += "<tr><td>" + d.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit",year:"2-digit"}) + "</td>"
       + "<td>" + fmtSec(x.inp.sprint) + "</td><td>" + fmtSec(x.inp.hang) + "</td><td>" + fmtTime(x.inp.run) + "</td>"
-      + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + "</td>"
+      + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + (x.note ? " (" + esc(x.note) + ")" : "") + "</td>"
       + '<td><button class="btn danger small" data-hdel="' + i + '">✕</button></td></tr>';
   });
   html += "</tbody></table></div>";
@@ -838,7 +871,7 @@ function renderPruefer(){
       + "<td>" + fmtSec(p.sprint) + "</td><td>" + fmtSec(p.hang) + "</td>"
       + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (FET)" : "") + "</td>"
       + '<td class="num"><b>' + (r.total ?? "–") + "</b></td>"
-      + "<td>" + (r.grade ? esc(r.grade) : "–") + "</td>"
+      + "<td>" + (r.grade ? esc(r.grade) + (r.noteText ? " (" + r.noteText + ")" : "") : "–") + "</td>"
       + '<td><button class="btn secondary small" data-pedit="' + i + '">✎</button> '
       + '<button class="btn danger small" data-pdel="' + i + '">✕</button></td></tr>';
   });
@@ -864,6 +897,7 @@ function openEditor(index){
   $("e-title").textContent = p ? "Teilnehmer bearbeiten" : "Teilnehmer hinzufügen";
   $("e-name").value = p?.name || "";
   $("e-age").value = p?.age ?? "";
+  $("e-noage").checked = !!p?.noAge;
   $("e-sprint").value = p?.sprint != null ? String(p.sprint).replace(".", ",") : "";
   $("e-hang").value = p?.hang != null ? String(p.hang).replace(".", ",") : "";
   $("e-run-min").value = p?.run != null ? Math.floor(p.run / 60) : "";
@@ -883,6 +917,7 @@ $("e-save").addEventListener("click", () => {
     name: $("e-name").value.trim() || "Teilnehmer " + (participants().length + 1),
     sex: segValue("e-sex"),
     age: parseNum($("e-age").value),
+    noAge: $("e-noage").checked,
     sprint: parseNum($("e-sprint").value),
     hang: parseNum($("e-hang").value),
     runType: segValue("e-runtype"),
@@ -900,7 +935,7 @@ $("p-export").addEventListener("click", async () => {
   if (!Edition.isPremium()){ openPremium(); return; }
   const list = participants();
   if (!list.length){ alert("Die Teilnehmerliste ist leer."); return; }
-  let csv = "﻿Name;Wertung;Alter;Sprinttest (s);Klimmhang (s);Ausdauer;Ausdauerzeit;Punkte Sprint;Punkte Klimmhang;Punkte Ausdauer;Gesamtpunkte;Note;Status\r\n";
+  let csv = "﻿Name;Wertung;Alter;Sprinttest (s);Klimmhang (s);Ausdauer;Ausdauerzeit;Punkte Sprint;Punkte Klimmhang;Punkte Ausdauer;Gesamtpunkte;Note;Note (Zahl);Status\r\n";
   list.forEach(p => {
     const r = BFT.evaluate(p);
     csv += [
@@ -911,7 +946,7 @@ $("p-export").addEventListener("click", async () => {
       p.runType === "fet" ? "FET 3000 m" : "1000-m-Lauf",
       p.run != null ? fmtTime(p.run) : "",
       r.points.sprint ?? "", r.points.hang ?? "", r.points.run ?? "",
-      r.total ?? "", r.grade ?? "",
+      r.total ?? "", r.grade ?? "", r.noteText ?? "",
       !r.complete ? "unvollständig" : (r.allPass ? "bestanden" : "nicht bestanden")
     ].join(";") + "\r\n";
   });
