@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BFT Rechner – Basis-Fitness-Test Punkterechner (inoffiziell)</title>
-<meta name="description" content="Inoffizieller Punkterechner für den Basis-Fitness-Test (BFT): 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen. Mit Prüfermodus für Gruppen. Kein Angebot der Bundeswehr.">
+<title>BFT Rechner – Basis-Fitness-Test Punkterechner</title>
+<meta name="description" content="Punkterechner für den Basis-Fitness-Test (BFT): 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen. Mit Prüfermodus für Gruppen.">
 <meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#171a14" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -51,8 +51,6 @@
   header.app .logo{width:34px;height:34px;flex:none}
   header.app h1{font-size:1.12rem;margin:0;line-height:1.2}
   header.app .sub{font-size:.72rem;color:var(--text2);display:block;font-weight:400}
-  .badge-inoff{font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);
-    color:var(--text2);border-radius:99px;padding:2px 8px;white-space:nowrap}
   .spacer{flex:1}
   .iconbtn{background:#ffffff;border:1.5px solid #b8bda9;border-radius:10px;color:#111111;
     width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:grid;place-items:center}
@@ -189,7 +187,6 @@
 <header class="app">
   <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#3d4a33"/><circle cx="32" cy="36" r="17" fill="none" stroke="#e8ecdf" stroke-width="4"/><rect x="27" y="12" width="10" height="5" rx="2" fill="#e8ecdf"/><line x1="32" y1="36" x2="32" y2="25" stroke="#b8c94a" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="36" x2="40" y2="41" stroke="#e8ecdf" stroke-width="3.4" stroke-linecap="round"/></svg>
   <h1>BFT Rechner<span class="sub">Basis-Fitness-Test · Punkte &amp; Noten</span></h1>
-  <span class="badge-inoff" title="Privates Projekt – kein Angebot der Bundeswehr">inoffiziell</span>
   <span class="spacer"></span>
   <button class="iconbtn" id="btn-settings" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
 </header>
@@ -432,7 +429,7 @@
 </div>
 
 <footer class="app">
-  Inoffizielle App · privates Projekt von Merc Studios · kein Angebot der Bundeswehr · alle Angaben ohne Gewähr<br>
+  Merc Studios · Alle Angaben ohne Gewähr<br>
   <a href="datenschutz.html">Datenschutz &amp; Impressum</a> · <a href="#" id="foot-sources">Quellen</a>
 </footer>
 
@@ -443,7 +440,6 @@
       <div class="emoji">🎖️</div>
       <h2>Willkommen beim BFT Rechner!</h2>
       <p>Berechne Punkte und Note für den Basis-Fitness-Test: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (oder Fahrradergometer).</p>
-      <p class="muted">Inoffizielle App – privates Projekt, kein Angebot der Bundeswehr.</p>
     </div>
     <div class="ob-step" data-step="1">
       <div class="emoji">🏃📋</div>
