@@ -47,7 +47,9 @@
     position:sticky; top:0; z-index:30; background:var(--panel); border-bottom:1px solid var(--line);
     padding:10px 14px calc(10px); padding-top:calc(10px + env(safe-area-inset-top));
     display:flex; align-items:center; gap:10px;
+    transition:transform .25s ease;
   }
+  header.app.hidden{transform:translateY(-100%)}
   header.app .logo{width:38px;height:38px;flex:none;border-radius:9px}
   header.app h1{font-size:1.12rem;margin:0;line-height:1.2}
   header.app .sub{font-size:.72rem;color:var(--text2);display:block;font-weight:400}
@@ -193,6 +195,15 @@
     display:none;align-items:center;gap:10px;font-size:.78rem;color:var(--text2)}
   body.edition-free #adbar{display:flex}
   body.edition-free main{padding-bottom:130px}
+  #t-sticky{position:fixed;left:0;right:0;bottom:var(--adbar-h,0);z-index:24;display:none;
+    align-items:center;gap:10px;background:var(--panel);border-top:1px solid var(--line);
+    box-shadow:0 -3px 12px rgba(0,0,0,.14);padding:8px 14px}
+  body.edition-premium #t-sticky{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  body.tsticky-on #t-sticky{display:flex}
+  body.tsticky-on #view-teilnehmer{padding-bottom:20px}
+  #t-sticky .ts-left{flex:1;color:var(--text);font-size:.9rem}
+  #t-sticky .ts-left b{font-size:1.1rem;font-variant-numeric:tabular-nums}
+  #t-sticky .grade{font-size:.82rem;padding:3px 11px}
   #adbar .adlabel{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.62rem;text-transform:uppercase;flex:none}
   #adbar a{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
   footer.app{background:var(--panel);border-top:1px solid var(--line);color:var(--text2);font-size:.76rem;
@@ -546,6 +557,10 @@
 </main>
 
 <!-- Werbe-Platzhalter (nur freie Edition) -->
+<div id="t-sticky">
+  <span class="ts-left">Gesamt <b id="ts-pts">–</b> Punkte</span>
+  <span class="grade" id="ts-grade" style="display:none">–</span>
+</div>
 <div id="adbar">
   <span class="adlabel">Anzeige</span>
   <span style="flex:1">Werbefrei &amp; alle Prüfer-Extras: Premium für einmalig 2,99&nbsp;€.</span>
@@ -1006,6 +1021,7 @@ const Edition = {
     document.body.classList.toggle("edition-free", !this.isPremium());
     document.body.classList.toggle("edition-premium", this.isPremium());
     renderSettings(); renderPruefer(); if (typeof renderHistory === "function") renderHistory();
+    if (typeof updateAdbarH === "function") updateAdbarH();
   }
 };
 
@@ -1134,6 +1150,8 @@ function show(view){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   $("view-" + view).classList.add("active");
   window.scrollTo(0, 0);
+  document.querySelector("header.app").classList.remove("hidden"); lastScrollY = 0;
+  updateSticky();
 }
 document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", () => show(b.dataset.nav)));
 $("go-teilnehmer").addEventListener("click", () => show("teilnehmer"));
@@ -1216,6 +1234,7 @@ function tRender(){
   $("t-r-failhint").textContent = fails.length ? "Mindestanforderung verfehlt: " + fails.join(", ") + " – Test damit insgesamt nicht bestanden." : "";
   $("t-save").disabled = !r.complete;
   renderCalcBadges();
+  updateSticky();
 }
 ["t-age","t-sprint","t-hang","t-run-min","t-run-sec"].forEach(id => $(id).addEventListener("input", tRender));
 $("t-noage").addEventListener("change", tRender);
@@ -1782,6 +1801,35 @@ $("s-onboarding").addEventListener("click", () => { closeModal("modal-settings")
 if ("serviceWorker" in navigator && location.hostname.endsWith("github.io")){
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 }
+
+/* ---------- Kopfleiste beim Scrollen ausblenden ---------- */
+let lastScrollY = 0;
+window.addEventListener("scroll", () => {
+  const y = window.scrollY, hd = document.querySelector("header.app");
+  if (y > 64 && y > lastScrollY) hd.classList.add("hidden");
+  else hd.classList.remove("hidden");
+  lastScrollY = y;
+}, { passive: true });
+
+/* ---------- Mitwandernde Ergebnisleiste (Teilnehmer) ---------- */
+function updateSticky(){
+  const on = $("view-teilnehmer").classList.contains("active") && tCurrent && tCurrent.r.complete;
+  document.body.classList.toggle("tsticky-on", !!on);
+  if (on){
+    $("ts-pts").textContent = tCurrent.r.total;
+    const g = $("ts-grade");
+    g.style.display = "inline-block";
+    g.textContent = tCurrent.r.grade + (tCurrent.r.noteText ? " (" + tCurrent.r.noteText + ")" : "");
+    g.className = "grade " + tCurrent.r.gradeClass;
+  }
+}
+function updateAdbarH(){
+  const a = $("adbar");
+  const vis = a && getComputedStyle(a).display !== "none";
+  document.documentElement.style.setProperty("--adbar-h", vis ? a.offsetHeight + "px" : "0px");
+}
+window.addEventListener("load", updateAdbarH);
+window.addEventListener("resize", updateAdbarH);
 
 /* ---------- Start ---------- */
 applyTheme();
