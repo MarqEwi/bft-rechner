@@ -175,13 +175,13 @@
   .tag{display:inline-block;background:var(--bg3);border-radius:7px;padding:2px 8px;font-size:.76rem;color:var(--text2);margin:2px 3px 2px 0}
   /* Modals */
   .modal-back{position:fixed;inset:0;background:rgba(10,12,8,.55);z-index:50;display:none;
-    align-items:flex-end;justify-content:center;padding:0}
+    align-items:center;justify-content:center;padding:16px}
   .modal-back.open{display:flex}
   @media(min-width:560px){.modal-back{align-items:center;padding:20px}}
   #modal-onboarding{align-items:center;padding:16px}
   #modal-onboarding .modal{border-radius:18px}
-  .modal{background:var(--bg2);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto;
-    border-radius:18px 18px 0 0;padding:18px 18px 22px;border:1px solid var(--line)}
+  .modal{background:var(--bg2);width:100%;max-width:560px;max-height:86dvh;overflow-y:auto;
+    border-radius:18px;padding:18px 18px 22px;border:1px solid var(--line)}
   @media(min-width:560px){.modal{border-radius:18px}}
   .modal h2{margin-top:0}
   .modal .x{float:right;margin:-4px -4px 0 8px}
@@ -1081,6 +1081,64 @@ const Ads = {
   }
 };
 
+/* ---------- Premium-Kauf (Google Play Billing) ----------
+   Läuft nur in der Android-App über das Plugin "cordova-plugin-purchase".
+   Der Artikel "premium_unlock" (einmaliger Kauf, 2,99 €) muss dafür in der
+   Google Play Console angelegt sein – bis dahin meldet der Kauf-Knopf,
+   dass der Kauf noch nicht verfügbar ist.                              */
+const Billing = {
+  PRODUCT: "premium_unlock",
+  inited: false, product: null,
+  available(){
+    try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.CdvPurchase && window.CdvPurchase.store); }
+    catch(e){ return false; }
+  },
+  init(){
+    if (this.inited || !this.available()) return;
+    this.inited = true;
+    try {
+      const { store, ProductType, Platform } = window.CdvPurchase;
+      store.register([{ id: this.PRODUCT, type: ProductType.NON_CONSUMABLE, platform: Platform.GOOGLE_PLAY }]);
+      store.when()
+        .productUpdated(() => { this.product = store.get(this.PRODUCT); this.refreshModal(); })
+        .approved(tr => { this.unlock(); try { tr.finish(); } catch(e){} })
+        .receiptUpdated(() => {
+          /* Früherer Kauf (z. B. nach Neuinstallation) wird automatisch erkannt */
+          try { if (store.owned(this.PRODUCT) && !Edition.isPremium()) this.unlock(); } catch(e){}
+        });
+      store.initialize([Platform.GOOGLE_PLAY]);
+    } catch(e){}
+  },
+  unlock(){
+    if (!Edition.isPremium()){ Edition.set("premium"); this.refreshModal(); }
+  },
+  price(){
+    try { return (this.product && this.product.pricing && this.product.pricing.price) || null; }
+    catch(e){ return null; }
+  },
+  buy(){
+    try {
+      const offer = this.product && this.product.getOffer && this.product.getOffer();
+      if (!offer){
+        alert("Der Kauf ist im Moment nicht verfügbar. Bitte prüfe deine Internetverbindung und versuche es später erneut.");
+        return;
+      }
+      offer.order().then(err => {
+        if (err && err.isError) alert("Der Kauf wurde abgebrochen oder ist fehlgeschlagen.");
+      });
+    } catch(e){
+      alert("Der Kauf ist im Moment nicht verfügbar. Bitte versuche es später erneut.");
+    }
+  },
+  restore(){
+    try { window.CdvPurchase.store.restorePurchases(); } catch(e){}
+  },
+  refreshModal(){
+    const m = document.getElementById("modal-premium");
+    if (m && m.classList.contains("open") && typeof openPremium === "function") openPremium();
+  }
+};
+
 /* ---------- Native Brücke (Capacitor) mit Feature-Detection ----------
    Im Browser: a.download bzw. window.print().
    In der späteren Android-App (Capacitor): Filesystem+Share bzw. Printer-Plugin.
@@ -1641,12 +1699,12 @@ function openPremium(){
   if (Edition.isPremium()){
     area.innerHTML = '<p><b>💎 Premium ist aktiv – danke für deine Unterstützung!</b></p>';
   } else if (Bridge.isNative()){
-    /* In der Android-App: Kauf über Google Play Billing (wird in der App-Phase angebunden) */
-    area.innerHTML = '<div class="btn-row"><button class="btn" id="premium-buy">Für 2,99 € freischalten</button></div>';
-    area.querySelector("#premium-buy").addEventListener("click", () => {
-      if (window.BftNative && window.BftNative.buyPremium) window.BftNative.buyPremium();
-      else alert("Der Kauf ist in dieser Version noch nicht verfügbar.");
-    });
+    /* In der Android-App: Kauf über Google Play Billing */
+    const price = Billing.price() || "2,99 €";
+    area.innerHTML = '<div class="btn-row"><button class="btn" id="premium-buy">Für ' + price + ' freischalten</button></div>'
+      + '<p style="text-align:center;margin:10px 0 0"><a href="#" id="premium-restore" style="font-size:.82rem;color:var(--accent2)">Käufe wiederherstellen</a></p>';
+    area.querySelector("#premium-buy").addEventListener("click", () => Billing.buy());
+    area.querySelector("#premium-restore").addEventListener("click", e => { e.preventDefault(); Billing.restore(); });
   } else {
     area.innerHTML = '<div class="notice">Der Kauf ist in der Android-App über Google Play möglich. '
       + 'Diese Web-Version ist eine Vorschau – hier kannst du Premium testweise aktivieren:</div>'
@@ -1900,6 +1958,11 @@ window.addEventListener("resize", updateAdbarH);
 applyTheme();
 Edition.apply();
 Ads.sync();
+if (Bridge.isNative()){
+  document.addEventListener("deviceready", () => Billing.init(), { once: true });
+  /* Fallback, falls deviceready bereits gefeuert hat: */
+  setTimeout(() => Billing.init(), 3000);
+}
 renderHistory();
 renderPruefer();
 tRender();
