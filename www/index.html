@@ -218,6 +218,10 @@
     <path d="M12 3.5V14M7.5 9.5L12 14l4.5-4.5"/>
     <path d="M4 15.5v3A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5v-3"/>
   </symbol>
+  <symbol id="i-export" viewBox="0 0 24 24">
+    <path d="M12 15V3.5M8 7l4-3.5L16 7"/>
+    <path d="M5 12.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6.5"/>
+  </symbol>
   <symbol id="i-trend" viewBox="0 0 24 24">
     <path d="M3.5 20.5h17"/>
     <path d="M4.5 16l5-5 3 3 6.5-6.5"/>
@@ -376,7 +380,7 @@
     <div id="pruefer-tab-erfassen">
       <div class="btn-row">
         <button class="btn" id="p-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Teilnehmer hinzufügen</button>
-        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export <span class="premium-star" id="p-export-star">★</span></button>
+        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export <span class="premium-star" id="p-export-star">★</span></button>
         <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Drucken</button>
         <button class="btn danger small" id="p-clear" style="margin-left:auto">Liste leeren</button>
       </div>
@@ -584,7 +588,7 @@
     <ul>
       <li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg> Keine Werbung</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg> Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 5)</li>
-      <li><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Ergebnisliste als PDF, Bild oder Text exportieren</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Ergebnisliste als PDF, Bild oder Text exportieren</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg> Unterstützt die Weiterentwicklung</li>
     </ul>
     <div id="premium-buy-area"></div>
@@ -599,9 +603,9 @@
     <h2>Ergebnisliste exportieren</h2>
     <p class="muted">Wähle das Format – die Datei wird lokal gespeichert (in der App zum Speichern/Teilen).</p>
     <div class="btn-row" style="flex-direction:column;align-items:stretch">
-      <button class="btn" id="exp-pdf"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als PDF</button>
-      <button class="btn secondary" id="exp-img"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als Bild (PNG)</button>
-      <button class="btn secondary" id="exp-txt"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Export als Text</button>
+      <button class="btn" id="exp-pdf"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export als PDF</button>
+      <button class="btn secondary" id="exp-img"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export als Bild (PNG)</button>
+      <button class="btn secondary" id="exp-txt"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export als Text</button>
     </div>
   </div>
 </div>
@@ -1127,7 +1131,7 @@ function exportText(){
   txt += fmt(head) + "\n";
   txt += w.map(x => "-".repeat(x)).join("  ") + "\n";
   rows.forEach(r => txt += fmt(r) + "\n");
-  txt += "\nInoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.\n";
+  txt += "\nErstellt mit dem BFT Tool – Basis Fitness Test\n";
   Bridge.saveTextFile("bft-ergebnisliste-" + dateStamp() + ".txt", txt, "text/plain");
   closeModal("modal-export");
 }
@@ -1175,7 +1179,7 @@ function exportImage(){
   });
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#5b6152"; ctx.font = "12px system-ui, Arial, sans-serif";
-  ctx.fillText("Inoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.", padX, y + 26);
+  ctx.fillText("Erstellt mit dem BFT Tool – Basis Fitness Test", padX, y + 26);
   cv.toBlob(blob => { Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".png", blob); }, "image/png");
   closeModal("modal-export");
 }
@@ -1220,7 +1224,7 @@ function exportPdf(){
   const fmt = cells => cells.map((c,i) => c.padEnd(w[i])).join("  ");
   const lines = ["BFT Tool - Ergebnisliste (Basis-Fitness-Test)", "Erstellt: " + dateStr(), "", fmt(head), w.map(x => "-".repeat(x)).join("  ")];
   rows.forEach(r => lines.push(fmt(r)));
-  lines.push(""); lines.push("Inoffiziell, kein Angebot der Bundeswehr. Alle Angaben ohne Gewähr.");
+  lines.push(""); lines.push("Erstellt mit dem BFT Tool – Basis Fitness Test");
   Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".pdf", strToBlob(buildPdf(lines), "application/pdf"));
   closeModal("modal-export");
 }
