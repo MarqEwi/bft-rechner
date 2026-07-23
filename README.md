@@ -36,8 +36,9 @@ und Note.
 
 Frauen erhalten einen Leistungszuschlag von 15 % (Sprint, Ausdauer) bzw. 40 % (Klimmhang).
 Note aus der Punktsumme: ab 300 ausreichend, 600 befriedigend, 900 gut, 1200 sehr gut –
-sofern in jeder Disziplin mindestens 100 Punkte erreicht wurden. Ein Alterszuschlag ist
-offiziell vorgesehen, in dieser Version aber noch nicht enthalten.
+sofern in jeder Disziplin mindestens 100 Punkte erreicht wurden; zusätzlich als Dezimalnote
+(1200 = 1,0 · 900 = 2,0 · 600 = 3,0 · 300 = 4,0). Alterszuschlag: ab dem vollendeten
+36. Lebensjahr +0,5 % Punkte pro Lebensjahr (abschaltbar).
 
 Quellen: bundeswehr.de (Basis-Fitness-Test), Informationsblatt „Sporttest Basis-Fitness-Test“,
 einstellungstest-bundeswehr.de, Wikipedia „Basis-Fitness-Test“.
