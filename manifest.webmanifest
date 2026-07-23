@@ -1,7 +1,7 @@
 {
-  "name": "BFT Rechner (inoffiziell)",
+  "name": "BFT Rechner",
   "short_name": "BFT Rechner",
-  "description": "Inoffizieller Punkterechner für den Basis-Fitness-Test: Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen. Kein Angebot der Bundeswehr.",
+  "description": "Punkterechner für den Basis-Fitness-Test: Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
