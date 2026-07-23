@@ -89,13 +89,9 @@ lint/tmp/
 # Android Profiling
 *.hprof
 
-# Cordova plugins for Capacitor
-capacitor-cordova-android-plugins
-
-# Copied web assets
-app/src/main/assets/public
-
-# Generated Config files
-app/src/main/assets/capacitor.config.json
-app/src/main/assets/capacitor.plugins.json
-app/src/main/res/xml/config.xml
+# Hinweis: Die von Capacitor erzeugten Dateien (capacitor-cordova-android-plugins,
+# app/src/main/assets/public, capacitor.config.json, capacitor.plugins.json)
+# werden in diesem Projekt bewusst MIT eingecheckt, damit das Projekt nach dem
+# Klonen direkt in Android Studio baubar ist – ohne dass vorher npm-Befehle
+# laufen müssen. "npm run cap:sync" aktualisiert sie bei Änderungen an der Web-App.
+capacitor-cordova-android-plugins/build/
