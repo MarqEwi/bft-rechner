@@ -198,6 +198,8 @@
     display:none;align-items:center;gap:10px;font-size:.78rem;color:var(--text2)}
   body.edition-free #adbar{display:flex}
   body.edition-free main{padding-bottom:130px}
+  body.native-ads #adbar{display:none}
+  body.native-ads.edition-free main{padding-bottom:calc(var(--native-ad-h,60px) + 40px)}
   #t-sticky{position:fixed;left:0;right:0;bottom:var(--adbar-h,0);z-index:24;display:none;
     align-items:center;gap:10px;background:var(--panel);border-top:1px solid var(--line);
     box-shadow:0 -3px 12px rgba(0,0,0,.14);padding:8px 14px}
@@ -1029,6 +1031,53 @@ const Edition = {
     document.body.classList.toggle("edition-premium", this.isPremium());
     renderSettings(); renderPruefer(); if (typeof renderHistory === "function") renderHistory();
     if (typeof updateAdbarH === "function") updateAdbarH();
+    if (typeof Ads === "object" && Ads.sync) Ads.sync();
+  }
+};
+
+/* ---------- Werbung (AdMob) – läuft nur in der Android-App ----------
+   Im Browser bleibt der HTML-Platzhalter (#adbar) sichtbar.
+   In der App zeigt AdMob ein echtes Banner unten; der Platzhalter wird
+   dann ausgeblendet. Premium entfernt das Banner komplett.
+   Aktuell laufen Googles offizielle TEST-Anzeigen – vor der
+   Veröffentlichung durch die echten Anzeigen-IDs ersetzen.            */
+const Ads = {
+  plugin: null, showing: false,
+  BANNER_ID: "ca-app-pub-3940256099942544/6300978111", /* Google-Test-Banner */
+  available(){
+    try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.registerPlugin); }
+    catch(e){ return false; }
+  },
+  async ensureInit(){
+    if (this.plugin) return true;
+    if (!this.available()) return false;
+    try {
+      const p = window.Capacitor.registerPlugin("AdMob");
+      await p.initialize({ initializeForTesting: true });
+      p.addListener("bannerAdSizeChanged", info => {
+        const h = info && info.height ? Math.max(0, Math.round(info.height)) : 0;
+        document.documentElement.style.setProperty("--native-ad-h", h + "px");
+        document.body.classList.toggle("native-ads", h > 0);
+        updateAdbarH();
+      });
+      this.plugin = p;
+      return true;
+    } catch(e){ return false; }
+  },
+  async sync(){
+    if (!this.available()) return;
+    try {
+      if (Edition.isPremium()){
+        if (this.showing){ await this.plugin.removeBanner(); this.showing = false; }
+        document.body.classList.remove("native-ads");
+        document.documentElement.style.setProperty("--native-ad-h", "0px");
+        updateAdbarH();
+        return;
+      }
+      if (!(await this.ensureInit()) || this.showing) return;
+      await this.plugin.showBanner({ adId: this.BANNER_ID, adSize: "ADAPTIVE_BANNER", position: "BOTTOM_CENTER", margin: 0, isTesting: true });
+      this.showing = true;
+    } catch(e){ /* Ohne Werbung weiterlaufen – die App bleibt voll nutzbar */ }
   }
 };
 
@@ -1835,6 +1884,11 @@ function updateSticky(){
   }
 }
 function updateAdbarH(){
+  if (document.body.classList.contains("native-ads")){
+    const nh = getComputedStyle(document.documentElement).getPropertyValue("--native-ad-h").trim();
+    document.documentElement.style.setProperty("--adbar-h", nh || "0px");
+    return;
+  }
   const a = $("adbar");
   const vis = a && getComputedStyle(a).display !== "none";
   document.documentElement.style.setProperty("--adbar-h", vis ? a.offsetHeight + "px" : "0px");
@@ -1845,6 +1899,7 @@ window.addEventListener("resize", updateAdbarH);
 /* ---------- Start ---------- */
 applyTheme();
 Edition.apply();
+Ads.sync();
 renderHistory();
 renderPruefer();
 tRender();
