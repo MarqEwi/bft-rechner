@@ -360,8 +360,8 @@
       </div>
       <div class="row2">
         <div>
-          <label class="field" for="t-age">Alter (optional)</label>
-          <input type="number" id="t-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+          <label class="field" for="t-age">Geburtsjahr (optional)</label>
+          <input type="number" id="t-age" min="1930" max="2015" inputmode="numeric" placeholder="z. B. 1990">
           <label class="checkline"><input type="checkbox" id="t-noage"> ohne Alterszuschlag</label>
         </div>
         <div>
@@ -545,7 +545,7 @@
             <li>Vorzeitiger Abbruch einer Disziplin oder Überschreiten der Maximalzeit → Test insgesamt nicht bestanden</li>
             <li>In jeder Disziplin sind mindestens 100 Punkte erforderlich</li>
             <li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang (Mindestanforderungen gelten unverändert für alle)</li>
-            <li>Alterszuschlag: ab dem vollendeten 36. Lebensjahr wird die erreichte Punktzahl um 0,5 % pro Lebensjahr erhöht</li>
+            <li>Alterszuschlag: ab dem 36. Lebensjahr +0,5 % pro Lebensjahr (Alter = im Kalenderjahr erreichtes Alter, also Kalenderjahr − Geburtsjahr)</li>
             <li>Bewerbende können den BFT bei Nichtbestehen nach 6 Monaten wiederholen; Soldatinnen und Soldaten absolvieren ihn jährlich</li>
             <li>Vor Beginn: Erwärmung ermöglichen, Sportkleidung/Hallenschuhe, Gesundheitszustand erfragen</li>
           </ul>
@@ -795,8 +795,8 @@
         </div>
       </div>
       <div>
-        <label class="field" for="e-age">Alter (optional)</label>
-        <input type="number" id="e-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+        <label class="field" for="e-age">Geburtsjahr (optional)</label>
+        <input type="number" id="e-age" min="1930" max="2015" inputmode="numeric" placeholder="z. B. 1990">
         <label class="checkline"><input type="checkbox" id="e-noage"> ohne Alterszuschlag</label>
       </div>
     </div>
@@ -842,8 +842,8 @@
         </div>
       </div>
       <div>
-        <label class="field" for="h-age">Alter (optional)</label>
-        <input type="number" id="h-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+        <label class="field" for="h-age">Geburtsjahr (optional)</label>
+        <input type="number" id="h-age" min="1930" max="2015" inputmode="numeric" placeholder="z. B. 1990">
         <label class="checkline"><input type="checkbox" id="h-noage"> ohne Alterszuschlag</label>
       </div>
     </div>
@@ -933,6 +933,7 @@ const Calc = {
    werden – nach offizieller Regel – Geschlechts- (w: +15 %/+40 %/+15 %) und
    Alterszuschlag (+0,5 %/Jahr ab 36) addiert. CAP dient nur der Balkenskalierung.
    Ohne Gewähr – maßgeblich ist die offizielle Wertung. --------------------- */
+const CUR_YEAR = new Date().getFullYear();
 const BFT = {
   CAP: 500,
   nn(p){ return Math.max(0, Math.round(p)); },
@@ -944,9 +945,10 @@ const BFT = {
   },
   thresholds(){ const A = Calc.active().anchors; return { sprint: A.sprint.p100, hang: A.hang.p100, run: A.run.p100 }; },
   surch(){ return Calc.active().surch || Calc.STANDARD.surch; },
-  evaluate({sprint, hang, run, sex, age, noAge}){
+  evaluate({sprint, hang, run, sex, birthYear, noAge}){
     const c = Calc.active();
     const A = c.anchors, S = c.surch || Calc.STANDARD.surch;
+    const age = birthYear != null ? CUR_YEAR - birthYear : null;
     const aP = (noAge || age == null || !(age > 35)) ? 0 : (Math.min(age, 90) - 35) * S.age;
     const gKey = { sprint: "gS", hang: "gH", run: "gR" };
     const raw = { sprint, hang, run };
@@ -1126,7 +1128,7 @@ const DISC_INFO = {
       '<li>Die Gesamtnote ist der Mittelwert der drei Disziplin-Noten (auf zwei Nachkommastellen)</li></ul>' +
       '<span class="tag">Zuschläge</span><ul>' +
       '<li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang</li>' +
-      '<li>Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht (in der App abschaltbar)</li>' +
+      '<li>Alterszuschlag: ab dem 36. Lebensjahr +0,5 % pro Lebensjahr; maßgeblich ist das im Kalenderjahr erreichte Alter (Kalenderjahr − Geburtsjahr), in der App abschaltbar</li>' +
       '<li>Die Mindestanforderungen (60 s / 5 s / 6:30 min) gelten unverändert für alle</li></ul>' +
       '<span class="tag">Ablauf</span><ul>' +
       '<li>Die drei Disziplinen werden nacheinander in fester Reihenfolge absolviert (Sprint → Klimmhang → Ausdauer)</li>' +
@@ -1192,7 +1194,7 @@ function tRead(){
   const runMin = parseNum($("t-run-min").value), runSec = parseNum($("t-run-sec").value);
   return {
     sex: segValue("t-sex"),
-    age: parseNum($("t-age").value),
+    birthYear: parseNum($("t-age").value),
     noAge: $("t-noage").checked,
     sprint: parseNum($("t-sprint").value),
     hang: parseNum($("t-hang").value),
@@ -1292,7 +1294,7 @@ function openHistEditor(index){
   const inp = e ? e.inp : { sex:"m", age:null, noAge:false, sprint:null, hang:null, run:null, runType:"lauf" };
   $("h-title").textContent = e ? "Eintrag bearbeiten" : "Eintrag manuell anlegen";
   $("h-date").value = isoDate(e ? e.date : null);
-  $("h-age").value = inp.age ?? "";
+  $("h-age").value = inp.birthYear ?? "";
   $("h-noage").checked = !!inp.noAge;
   $("h-sprint").value = inp.sprint != null ? String(inp.sprint).replace(".", ",") : "";
   $("h-hang").value = inp.hang != null ? String(inp.hang).replace(".", ",") : "";
@@ -1310,7 +1312,7 @@ $("h-save").addEventListener("click", () => {
   const runMin = parseNum($("h-run-min").value), runSec = parseNum($("h-run-sec").value);
   const inp = {
     sex: segValue("h-sex"),
-    age: parseNum($("h-age").value),
+    birthYear: parseNum($("h-age").value),
     noAge: $("h-noage").checked,
     sprint: parseNum($("h-sprint").value),
     hang: parseNum($("h-hang").value),
@@ -1360,7 +1362,7 @@ function renderPruefer(){
       : '<span class="pill-status ' + (r.allPass ? "" : "") + '" style="background:var(--' + (r.allPass ? "ok" : "bad") + ')">' + (r.allPass ? "bestanden" : "nicht best.") + "</span>";
     const calcMark = Calc.isCustomActive() ? ' <span class="mini-badge" title="Eigene Berechnung: ' + esc(Calc.active().name) + '">✦ eigene</span>' : "";
     html += "<tr><td><b>" + esc(p.name || "–") + "</b>" + calcMark + "<br><span class='muted'>" + status + "</span></td>"
-      + "<td>" + (p.sex === "w" ? "F" : "M") + (p.age ? " · " + p.age : "") + "</td>"
+      + "<td>" + (p.sex === "w" ? "F" : "M") + (p.birthYear ? " · Jg. " + p.birthYear : "") + "</td>"
       + "<td>" + fmtSec(p.sprint) + "</td><td>" + fmtSec(p.hang) + "</td>"
       + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (Fahrradergometer)" : "") + "</td>"
       + '<td class="num"><b>' + (r.total ?? "–") + "</b></td>"
@@ -1389,7 +1391,7 @@ function openEditor(index){
   const p = index != null ? participants()[index] : null;
   $("e-title").textContent = p ? "Teilnehmer bearbeiten" : "Teilnehmer hinzufügen";
   $("e-name").value = p?.name || "";
-  $("e-age").value = p?.age ?? "";
+  $("e-age").value = p?.birthYear ?? "";
   $("e-noage").checked = !!p?.noAge;
   $("e-sprint").value = p?.sprint != null ? String(p.sprint).replace(".", ",") : "";
   $("e-hang").value = p?.hang != null ? String(p.hang).replace(".", ",") : "";
@@ -1409,7 +1411,7 @@ $("e-save").addEventListener("click", () => {
   const p = {
     name: $("e-name").value.trim() || "Teilnehmer " + (participants().length + 1),
     sex: segValue("e-sex"),
-    age: parseNum($("e-age").value),
+    birthYear: parseNum($("e-age").value),
     noAge: $("e-noage").checked,
     sprint: parseNum($("e-sprint").value),
     hang: parseNum($("e-hang").value),
@@ -1430,13 +1432,13 @@ function dateStr(){ return new Date().toLocaleDateString("de-DE", {day:"2-digit"
 /* Baut Kopf + Zeilen der Ergebnisliste (rein textuelle Werte) */
 function exportRows(){
   const list = participants();
-  const head = ["Name","Wtg","Alter","Sprint","Klimm","Ausdauer","Punkte","Note","Status"];
+  const head = ["Name","Wtg","Jahrgang","Sprint","Klimm","Ausdauer","Punkte","Note","Status"];
   const rows = list.map(p => {
     const r = BFT.evaluate(p);
     return [
       p.name || "-",
       p.sex === "w" ? "F" : "M",
-      p.age != null ? String(p.age) : "-",
+      p.birthYear != null ? String(p.birthYear) : "-",
       p.sprint != null ? String(p.sprint).replace(".",",") + "s" : "-",
       p.hang != null ? String(p.hang).replace(".",",") + "s" : "-",
       (p.run != null ? fmtTime(p.run) : "-") + (p.runType === "fet" ? " (Fahrradergometer)" : ""),
