@@ -62,7 +62,8 @@
   .soft-note{background:var(--panel-soft);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 13px}
   .info-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
     font:inherit;font-size:.9rem;font-weight:600;color:var(--text);padding:12px 14px}
-  .info-row span{flex:1}
+  .info-row-txt{flex:1}
+  .info-row-sub{font-weight:400;color:var(--text2);font-size:.82rem}
   .info-row .ic{width:22px;height:22px;color:var(--accent2);flex:none}
   .info-row:hover{border-color:var(--accent)}
   h3{font-size:1.02rem;margin:1rem 0 .4rem}
@@ -285,6 +286,8 @@
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"/><path d="M14.5 6.5l3 3"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M6 3h12l3.5 5.5L12 21 2.5 8.5z"/><path d="M2.5 8.5h19"/><path d="M9 3l-1.5 5.5L12 21M15 3l1.5 5.5L12 21"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><rect x="8" y="6" width="8" height="3.5"/><path d="M8.5 13h0M12 13h0M15.5 13h0M8.5 16.5h0M12 16.5h0M15.5 16.5h3"/></symbol>
 </svg>
 
 <header class="app">
@@ -314,10 +317,10 @@
     <div class="quickfacts">
       <div class="qf"><button class="qf-info" data-info="sprint" aria-label="Infos zum Sprinttest"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>11×10-m-Sprinttest</b>max. 60,0 s<br>(= 100 Punkte)</div>
       <div class="qf"><button class="qf-info" data-info="hang" aria-label="Infos zum Klimmhang"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>Klimmhang</b>min. 5 s<br>(= 100 Punkte)</div>
-      <div class="qf"><button class="qf-info" data-info="run" aria-label="Infos zum 1000-m-Lauf und Fahrradergometer"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>1000-m-Lauf / FET 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
+      <div class="qf"><button class="qf-info" data-info="run" aria-label="Infos zum 1000-m-Lauf und Fahrradergometer"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button><b>1000-m-Lauf / Fahrradergometer 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
     </div>
     <button class="soft-note info-row" data-info="allgemein" style="margin-top:12px">
-      <span>Allgemeine Informationen zum BFT – Basis Fitness Test</span>
+      <span class="info-row-txt"><b>Allgemeine Informationen zum BFT – Basis Fitness Test</b><br><span class="info-row-sub">In jeder Disziplin sind mindestens 100 Punkte nötig – wird eine verfehlt, gilt der Test als nicht bestanden.</span></span>
       <svg class="ic" aria-hidden="true"><use href="#i-info"/></svg>
     </button>
   </section>
@@ -341,7 +344,7 @@
         </div>
         <div>
           <label class="field" for="t-sprint">11×10-m-Sprinttest (Sekunden)</label>
-          <input type="text" id="t-sprint" inputmode="decimal" placeholder="z. B. 47,5">
+          <input type="text" id="t-sprint" inputmode="decimal" placeholder="z. B. 39,7 oder 39.7">
         </div>
       </div>
       <div class="row2">
@@ -353,7 +356,7 @@
           <label class="field">Ausdauer-Disziplin</label>
           <div class="seg" id="t-runtype">
             <button data-v="lauf" class="active">1000-m-Lauf</button>
-            <button data-v="fet">FET 3000 m</button>
+            <button data-v="fet">Fahrradergometer</button>
           </div>
           <div class="time-pair">
             <input type="number" id="t-run-min" min="2" max="10" inputmode="numeric" placeholder="min"> :
@@ -492,14 +495,14 @@
       </details>
 
       <details class="station">
-        <summary><span class="num">3</span> 1000-m-Lauf oder Fahrradergometer (FET 3000 m)</summary>
+        <summary><span class="num">3</span> 1000-m-Lauf oder Fahrradergometer (3000 m)</summary>
         <div class="inner">
           <span class="tag">1000-m-Lauf</span>
           <ul>
             <li>400-m-Bahn oder exakt vermessene, ebene Strecke; Startlinie markieren, Stoppuhr/Zeitnahme je Teilnehmer</li>
             <li>Maximalzeit 6:30 min = 100 Punkte</li>
           </ul>
-          <span class="tag">Alternative: Fahrradergometer-Test (FET)</span>
+          <span class="tag">Alternative: Fahrradergometer-Test</span>
           <ul>
             <li>Computergestütztes Ergometer, Strecke 3000 m, ebenfalls in maximal 6:30 min</li>
             <li>Anfangslast 130 Watt bei 80 Umdrehungen pro Minute; Sattel-/Lenkerhöhe vorab einstellen</li>
@@ -600,12 +603,12 @@
     </details>
 
     <details class="acc">
-      <summary><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Berechnung</summary>
+      <summary><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg> Berechnung</summary>
       <div class="acc-body" id="s-berechnung"></div>
     </details>
 
     <details class="acc">
-      <summary><svg class="ic" aria-hidden="true"><use href="#i-medal"/></svg> Premium</summary>
+      <summary><svg class="ic" aria-hidden="true"><use href="#i-diamond"/></svg> Premium</summary>
       <div class="acc-body">
         <p id="s-edition-status" class="muted"></p>
         <button class="btn" id="s-premium">★ Premium ansehen</button>
@@ -636,10 +639,9 @@
       <summary><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Quellen</summary>
       <div class="acc-body">
         <ul class="muted" style="padding-left:1.2rem;font-size:.82rem">
+          <li>Zentralanweisung B1-224/0-2 „Ausbildung und Erhalt der Individuellen Grundfertigkeiten und der Körperlichen Leistungsfähigkeit“ – Basispunktetabellen zum BFT (Stand Mai 2015)</li>
+          <li>Weisung des Generalinspekteurs der Bundeswehr zur IGF/KLF vom 18.02.2013</li>
           <li>bundeswehr.de – Sport in der Bundeswehr: Basis-Fitness-Test</li>
-          <li>Informationsblatt „Sporttest Basis-Fitness-Test“ (Bewerbende SaZ)</li>
-          <li>einstellungstest-bundeswehr.de – Bundeswehr Sporttest</li>
-          <li>Wikipedia: Basis-Fitness-Test</li>
         </ul>
       </div>
     </details>
@@ -731,7 +733,7 @@
     <div class="row2">
       <div>
         <label class="field" for="e-sprint">Sprinttest (s)</label>
-        <input type="text" id="e-sprint" inputmode="decimal" placeholder="47,5">
+        <input type="text" id="e-sprint" inputmode="decimal" placeholder="39,7 oder 39.7">
       </div>
       <div>
         <label class="field" for="e-hang">Klimmhang (s)</label>
@@ -741,7 +743,7 @@
     <label class="field">Ausdauer</label>
     <div class="seg" id="e-runtype">
       <button data-v="lauf" class="active">1000-m-Lauf</button>
-      <button data-v="fet">FET 3000 m</button>
+      <button data-v="fet">Fahrradergometer</button>
     </div>
     <div class="time-pair">
       <input type="number" id="e-run-min" min="2" max="10" placeholder="min" inputmode="numeric"> :
@@ -754,6 +756,54 @@
   </div>
 </div>
 
+<!-- ===== Verlauf-Eintrag (Teilnehmer, Premium) ===== -->
+<div class="modal-back" id="modal-hist">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Verlauf-Eintrag">
+    <button class="iconbtn x" data-close="modal-hist" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <h2 id="h-title">Eintrag hinzufügen</h2>
+    <label class="field" for="h-date">Datum</label>
+    <input type="date" id="h-date">
+    <div class="row2">
+      <div>
+        <label class="field">Wertungsgruppe</label>
+        <div class="seg" id="h-sex">
+          <button data-v="m" class="active">Männer</button>
+          <button data-v="w">Frauen</button>
+        </div>
+      </div>
+      <div>
+        <label class="field" for="h-age">Alter (optional)</label>
+        <input type="number" id="h-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+        <label class="checkline"><input type="checkbox" id="h-noage"> ohne Alterszuschlag</label>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label class="field" for="h-sprint">Sprinttest (s)</label>
+        <input type="text" id="h-sprint" inputmode="decimal" placeholder="39,7 oder 39.7">
+      </div>
+      <div>
+        <label class="field" for="h-hang">Klimmhang (s)</label>
+        <input type="text" id="h-hang" inputmode="decimal" placeholder="38">
+      </div>
+    </div>
+    <label class="field">Ausdauer</label>
+    <div class="seg" id="h-runtype">
+      <button data-v="lauf" class="active">1000-m-Lauf</button>
+      <button data-v="fet">Fahrradergometer</button>
+    </div>
+    <div class="time-pair">
+      <input type="number" id="h-run-min" min="2" max="10" placeholder="min" inputmode="numeric"> :
+      <input type="number" id="h-run-sec" min="0" max="59" placeholder="sek" inputmode="numeric">
+    </div>
+    <div id="h-err" class="hint-fail" style="display:none"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="h-save">Speichern</button>
+      <button class="btn secondary" data-close="modal-hist">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 /* =========================================================================
@@ -762,33 +812,30 @@
    ========================================================================= */
 
 /* ---------- Wertungssystem -------------------------------------------------
-   Anker laut offiziellem Informationsblatt „Sporttest Basis-Fitness-Test“:
-   - Sprinttest:  60,0 s = 100 P (Mindestanforderung), „sehr gut“ ab 41,99 s (= 400 P)
-   - Klimmhang:   5 s = 100 P, 45 s = 300 P („gut“), ab 65 s = 400 P („sehr gut“)
-   - 1000 m/FET:  6:30 min (390 s) = 100 P
-   Daraus abgeleitete lineare Punktformeln (öffentlich verbreitetes Schema):
-   - Sprint:   100 + (60 − Zeit) / 0,06   (≈ 16,7 P je Sekunde)
-   - Klimmhang:100 + (Zeit − 5) × 5
-   - Ausdauer: 100 + (390 − Zeit) / 0,6   („sehr gut“ = 400 P bei 3:30)
-   Frauen erhalten einen Leistungszuschlag von 15 % (Sprint, Ausdauer)
-   bzw. 40 % (Klimmhang) auf die erbrachte Leistung; die Mindestanforderungen
-   (60 s / 5 s / 390 s) gelten unverändert für alle.
-   Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten
-   Basispunkte um 0,5 % pro Lebensjahr erhöht (bis einschließlich 35: kein
-   Zuschlag); in der Eingabe abschaltbar („ohne Alterszuschlag“).
-   Punkte je Disziplin werden bei 500 gedeckelt. Ohne Gewähr – maßgeblich ist
-   die offizielle Wertung der Bundeswehr.
+   Basispunktetabellen zum BFT laut Zentralanweisung B1-224/0-2 (Stand Mai 2015):
+   - 11 x 10 m-Sprinttest: Basispunkte = 1100 − 16,667 × Sprintzeit (s)
+       60 s = 100 P · 48 s = 300 P · 42 s = 400 P
+   - Klimmhang:            Basispunkte = 75 + 5 × Klimmhangzeit (s)
+       5 s = 100 P · 45 s = 300 P · 65 s = 400 P
+   - 1000-m-Lauf:          Basispunkte = 100 + (390 − Laufzeit(s)) × 1,81818181
+       6:30 = 100 P · 4:40 = 300 P · 3:45 = 400 P
+   Diese linearen Formeln sind über die Anker p100/p400 abgebildet.
+   Zuschläge werden auf die Basispunkte addiert (offizielle Regel):
+   - Geschlecht (w): Sprint +15 %, Klimmhang +40 %, 1000-m-Lauf +15 %
+   - Alter ab 36. Lebensjahr: +0,5 % pro Lebensjahr (abschaltbar)
+   Mindestleistung je Disziplin = 100 Basispunkte (60 s / 5 s / 6:30).
+   Ohne Gewähr – maßgeblich ist die offizielle Wertung der Bundeswehr.
 --------------------------------------------------------------------------- */
 /* ---------- Berechnungs-Verwaltung (Standard + benutzerdefiniert) ---------- */
 const Calc = {
   CUSTOM_KEY: "bft_customcalcs",
   ACTIVE_KEY: "bft_activecalc",
-  SOURCE: "Bundeswehr – Informationsblatt „Sporttest Basis-Fitness-Test“ sowie einstellungstest-bundeswehr.de",
-  STAND: "Juli 2026",
+  SOURCE: "Zentralanweisung B1-224/0-2 „Ausbildung und Erhalt der Individuellen Grundfertigkeiten und der Körperlichen Leistungsfähigkeit“ – Basispunktetabellen zum BFT",
+  STAND: "Mai 2015",
   STANDARD: {
     id: "standard",
     name: "Standard (offiziell)",
-    anchors: { sprint: {p100:60, p400:42}, hang: {p100:5, p400:65}, run: {p100:390, p400:210} }
+    anchors: { sprint: {p100:60, p400:42}, hang: {p100:5, p400:65}, run: {p100:390, p400:225} }
   },
   customs(){ return load(this.CUSTOM_KEY, []); },
   list(){ return [this.STANDARD, ...this.customs()]; },
@@ -810,30 +857,34 @@ const Calc = {
 };
 
 /* ---------- Wertung nach der aktiven Berechnung ----------
-   Punkte je Disziplin über zwei Anker: p100 (Mindestleistung = 100 Punkte)
-   und p400 (Bestleistung = 400 Punkte), Zwischenwerte linear, Deckel 500.
-   Frauen-Zuschlag als Faktor auf die Leistung (15 %/40 %/15 %), Alterszuschlag
-   ab dem vollendeten 36. Lebensjahr +0,5 %/Jahr. Ohne Gewähr. --------------- */
+   Basispunkte je Disziplin über zwei Anker: p100 (Mindestleistung = 100 Punkte)
+   und p400 (Bestleistung = 400 Punkte), Zwischenwerte linear. Auf die Basispunkte
+   werden – nach offizieller Regel – Geschlechts- (w: +15 %/+40 %/+15 %) und
+   Alterszuschlag (+0,5 %/Jahr ab 36) addiert. CAP dient nur der Balkenskalierung.
+   Ohne Gewähr – maßgeblich ist die offizielle Wertung. --------------------- */
 const BFT = {
   CAP: 500,
-  SURCH: { sprint: 0.85, hang: 1.40, run: 0.85 },
-  clamp(p){ return Math.max(0, Math.min(this.CAP, Math.round(p))); },
-  sprintPoints(t, sex, A){ if (!(t > 0)) return null; const eff = sex === "w" ? t * this.SURCH.sprint : t; return this.clamp(100 + (A.sprint.p100 - eff) / (A.sprint.p100 - A.sprint.p400) * 300); },
-  hangPoints(t, sex, A){ if (!(t >= 0)) return null; const eff = sex === "w" ? t * this.SURCH.hang : t; return this.clamp(100 + (eff - A.hang.p100) / (A.hang.p400 - A.hang.p100) * 300); },
-  runPoints(t, sex, A){ if (!(t > 0)) return null; const eff = sex === "w" ? t * this.SURCH.run : t; return this.clamp(100 + (A.run.p100 - eff) / (A.run.p100 - A.run.p400) * 300); },
-  ageFactor(age, noAge){ if (noAge || age == null || !(age > 35)) return 1; return 1 + 0.005 * (Math.min(age, 90) - 35); },
+  GENDER: { sprint: 0.15, hang: 0.40, run: 0.15 },
+  nn(p){ return Math.max(0, Math.round(p)); },
+  basePoints(disc, t, A){
+    if (disc === "hang"){ if (!(t >= 0)) return null; return 100 + (t - A.hang.p100) / (A.hang.p400 - A.hang.p100) * 300; }
+    if (!(t > 0)) return null;
+    const a = A[disc]; // Sprint & Lauf: kürzere Zeit = mehr Punkte
+    return 100 + (a.p100 - t) / (a.p100 - a.p400) * 300;
+  },
+  agePct(age, noAge){ return (noAge || age == null || !(age > 35)) ? 0 : (Math.min(age, 90) - 35) * 0.005; },
   thresholds(){ const A = Calc.active().anchors; return { sprint: A.sprint.p100, hang: A.hang.p100, run: A.run.p100 }; },
   evaluate({sprint, hang, run, sex, age, noAge}){
     const A = Calc.active().anchors;
-    const f = this.ageFactor(age, noAge);
-    const base = {
-      sprint: this.sprintPoints(sprint, sex, A),
-      hang:   this.hangPoints(hang, sex, A),
-      run:    this.runPoints(run, sex, A)
-    };
+    const aP = this.agePct(age, noAge);
+    const raw = { sprint, hang, run };
     const p = {};
-    for (const k of ["sprint", "hang", "run"])
-      p[k] = base[k] == null ? null : Math.min(this.CAP, Math.round(base[k] * f));
+    for (const k of ["sprint", "hang", "run"]){
+      const b = this.basePoints(k, raw[k], A);
+      if (b == null){ p[k] = null; continue; }
+      const gP = sex === "w" ? this.GENDER[k] : 0;
+      p[k] = this.nn(b * (1 + gP + aP));
+    }
     const pass = {
       sprint: sprint != null && sprint <= A.sprint.p100,
       hang:   hang   != null && hang   >= A.hang.p100,
@@ -899,7 +950,7 @@ const Edition = {
   apply(){
     document.body.classList.toggle("edition-free", !this.isPremium());
     document.body.classList.toggle("edition-premium", this.isPremium());
-    renderSettings(); renderPruefer();
+    renderSettings(); renderPruefer(); if (typeof renderHistory === "function") renderHistory();
   }
 };
 
@@ -952,7 +1003,7 @@ const DISC_INFO = {
       '<li>Insgesamt 11 Teilstrecken à 10 m – nach dem 6. Aufstehen nur noch bis zur Pylone, dort wird die Zeit gestoppt</li></ul>' +
       '<span class="tag">Bewertung</span><ul>' +
       '<li>Maximal 60,0 s = 100 Punkte (Mindestanforderung, „ausreichend“)</li>' +
-      '<li>48,0 s = 300 Punkte („gut“) · ab 41,99 s = 400 Punkte („sehr gut“)</li>' +
+      '<li>48,0 s = 300 Punkte („gut“) · 42,0 s = 400 Punkte („sehr gut“)</li>' +
       '<li>Frauen erhalten 15 % Leistungszuschlag, ab dem 36. Lebensjahr gibt es zusätzlich den Alterszuschlag</li></ul>' +
       '<span class="tag">Häufige Fehler</span><ul>' +
       '<li>Pylone nicht vollständig umlaufen oder Wendepunkt abgekürzt</li>' +
@@ -976,30 +1027,30 @@ const DISC_INFO = {
       '<li>Griff rutscht durch – vorher Hände trocknen, ggf. Magnesia verwenden</li></ul>'
   },
   run: {
-    title: "1000-m-Lauf / Fahrradergometer (FET)",
+    title: "1000-m-Lauf / Fahrradergometer",
     html: '<span class="tag">Durchführung</span><ul>' +
       '<li>1000-m-Lauf auf der 400-m-Bahn oder einer exakt vermessenen, ebenen Strecke</li>' +
       '<li>Alternative je nach Vorgabe/Wetterlage: 3000 m auf dem computergestützten Fahrradergometer</li>' +
-      '<li>FET-Einstellungen: Anfangslast 130 Watt bei 80 Umdrehungen pro Minute</li>' +
+      '<li>Fahrradergometer: Anfangslast 130 Watt bei 80 Umdrehungen pro Minute</li>' +
       '<li>In beiden Varianten gilt die Maximalzeit von 6:30 min</li></ul>' +
       '<span class="tag">Bewertung</span><ul>' +
       '<li>6:30 min = 100 Punkte (Mindestanforderung, „ausreichend“)</li>' +
-      '<li>4:30 min = 300 Punkte („gut“) · ab 3:30 min = 400 Punkte („sehr gut“)</li>' +
+      '<li>4:40 min = 300 Punkte („gut“) · 3:45 min = 400 Punkte („sehr gut“)</li>' +
       '<li>Frauen erhalten 15 % Leistungszuschlag, ab dem 36. Lebensjahr gibt es zusätzlich den Alterszuschlag</li></ul>' +
       '<span class="tag">Häufige Fehler</span><ul>' +
       '<li>Zu schneller Start und Einbruch auf der zweiten Hälfte – Tempo gleichmäßig einteilen</li>' +
-      '<li>Beim FET die Trittfrequenz unter die Vorgabe fallen lassen</li>' +
+      '<li>Beim Fahrradergometer die Trittfrequenz unter die Vorgabe fallen lassen</li>' +
       '<li>Ohne Erwärmung starten</li></ul>'
   },
   allgemein: {
     title: "Allgemeine Informationen zum BFT",
     html: '<span class="tag">Was ist der BFT?</span><ul>' +
       '<li>Der Basis-Fitness-Test (BFT) prüft die grundlegende körperliche Leistungsfähigkeit anhand von Schnelligkeit, Kraft und Ausdauer</li>' +
-      '<li>Er besteht aus drei Disziplinen: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (bzw. Fahrradergometer, FET 3000 m)</li>' +
+      '<li>Er besteht aus drei Disziplinen: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (bzw. Fahrradergometer 3000 m)</li>' +
       '<li>Er wird u. a. von Bewerbenden für die Laufbahn Soldat auf Zeit abgelegt; aktive Soldatinnen und Soldaten wiederholen ihn regelmäßig</li></ul>' +
       '<span class="tag">Bewertung &amp; Note</span><ul>' +
       '<li>In jeder Disziplin sind mindestens 100 Punkte nötig – wird eine verfehlt, gilt der Test als nicht bestanden</li>' +
-      '<li>Je Disziplin sind bis zu 400 Punkte üblich (in dieser App bis 500 gedeckelt)</li>' +
+      '<li>Je Disziplin gibt es 100 Punkte für die Mindestleistung und 400 für die Bestleistung; darüber hinaus sind mehr Punkte möglich</li>' +
       '<li>Die Gesamtnote ergibt sich aus der Punktsumme aller drei Disziplinen: ab 300 ausreichend, ab 600 befriedigend, ab 900 gut, ab 1200 sehr gut</li>' +
       '<li>Diese App zeigt zusätzlich eine Dezimalnote (z. B. 1,0 = sehr gut … 5,0 = nicht bestanden)</li></ul>' +
       '<span class="tag">Zuschläge</span><ul>' +
@@ -1082,7 +1133,7 @@ function tRender(){
   const inp = tRead();
   const r = BFT.evaluate(inp);
   tCurrent = { inp, r };
-  $("t-r-run-name").textContent = inp.runType === "fet" ? "FET 3000 m" : "1000-m-Lauf";
+  $("t-r-run-name").textContent = inp.runType === "fet" ? "Fahrradergometer 3000 m" : "1000-m-Lauf";
   const th = BFT.thresholds();
   const rows = [
     ["sprint", inp.sprint != null ? fmtSec(inp.sprint) + (r.pass.sprint ? "" : " · über " + fmtSec(th.sprint) + "!") : "–"],
@@ -1125,25 +1176,85 @@ $("t-save").addEventListener("click", () => {
 });
 
 function renderHistory(){
-  const h = load(HIST_KEY, []);
+  const list = load(HIST_KEY, []);
   const el = $("t-history");
-  if (!h.length){ el.innerHTML = '<div class="empty">Noch keine gespeicherten Ergebnisse. Nach der Eingabe auf „Im Verlauf speichern“ tippen.</div>'; return; }
-  const best = Math.max(...h.map(x => x.total));
-  let html = '<p class="muted">Bestleistung: <b>' + best + ' Punkte</b> · ' + h.length + ' Einträge</p>';
+  const premium = Edition.isPremium();
+  let html = '<div class="btn-row" style="margin:0 0 8px"><button class="btn secondary small" id="h-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Eintrag manuell anlegen' + (premium ? "" : ' <span class="premium-star">★</span>') + "</button></div>";
+  if (!list.length){
+    html += '<div class="empty">Noch keine gespeicherten Ergebnisse. Nach der Eingabe auf „Im Verlauf speichern“ tippen' + (premium ? " oder oben manuell anlegen" : "") + ".</div>";
+    el.innerHTML = html;
+    $("h-add").addEventListener("click", onHistAdd);
+    return;
+  }
+  const best = Math.max(...list.map(x => x.total));
+  html += '<p class="muted">Bestleistung: <b>' + best + " Punkte</b> · " + list.length + " Einträge</p>";
   html += '<div class="tablewrap"><table><thead><tr><th>Datum</th><th>Sprint</th><th>Klimm.</th><th>Ausd.</th><th style="text-align:right">Punkte</th><th>Note</th><th></th></tr></thead><tbody>';
-  h.forEach((x, i) => {
+  list.forEach((x, i) => {
     const d = new Date(x.date);
     html += "<tr><td>" + d.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit",year:"2-digit"}) + "</td>"
       + "<td>" + fmtSec(x.inp.sprint) + "</td><td>" + fmtSec(x.inp.hang) + "</td><td>" + fmtTime(x.inp.run) + "</td>"
       + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + (x.note ? " (" + esc(x.note) + ")" : "") + "</td>"
-      + '<td><button class="btn danger small" data-hdel="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></td></tr>';
+      + '<td style="white-space:nowrap"><button class="btn secondary small" data-hedit="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-pen"/></svg></button> '
+      + '<button class="btn danger small" data-hdel="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></td></tr>';
   });
   html += "</tbody></table></div>";
   el.innerHTML = html;
+  $("h-add").addEventListener("click", onHistAdd);
+  el.querySelectorAll("[data-hedit]").forEach(b => b.addEventListener("click", () => onHistEdit(parseInt(b.dataset.hedit, 10))));
   el.querySelectorAll("[data-hdel]").forEach(b => b.addEventListener("click", () => {
     const h2 = load(HIST_KEY, []); h2.splice(parseInt(b.dataset.hdel, 10), 1); store(HIST_KEY, h2); renderHistory();
   }));
 }
+
+/* ---- Verlauf: manuell anlegen / bearbeiten (Premium) ---- */
+let histEditIndex = null;
+function onHistAdd(){ if (!Edition.isPremium()){ openPremium(); return; } openHistEditor(null); }
+function onHistEdit(i){ if (!Edition.isPremium()){ openPremium(); return; } openHistEditor(i); }
+function isoDate(ts){ const d = ts != null ? new Date(ts) : new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function openHistEditor(index){
+  histEditIndex = index;
+  const list = load(HIST_KEY, []);
+  const e = index != null ? list[index] : null;
+  const inp = e ? e.inp : { sex:"m", age:null, noAge:false, sprint:null, hang:null, run:null, runType:"lauf" };
+  $("h-title").textContent = e ? "Eintrag bearbeiten" : "Eintrag manuell anlegen";
+  $("h-date").value = isoDate(e ? e.date : null);
+  $("h-age").value = inp.age ?? "";
+  $("h-noage").checked = !!inp.noAge;
+  $("h-sprint").value = inp.sprint != null ? String(inp.sprint).replace(".", ",") : "";
+  $("h-hang").value = inp.hang != null ? String(inp.hang).replace(".", ",") : "";
+  $("h-run-min").value = inp.run != null ? Math.floor(inp.run / 60) : "";
+  $("h-run-sec").value = inp.run != null ? Math.round(inp.run % 60) : "";
+  ["h-sex","h-runtype"].forEach(id => {
+    const val = id === "h-sex" ? inp.sex : inp.runType;
+    $(id).querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === val));
+  });
+  $("h-err").style.display = "none";
+  openModal("modal-hist");
+}
+segInit("h-sex"); segInit("h-runtype");
+$("h-save").addEventListener("click", () => {
+  const runMin = parseNum($("h-run-min").value), runSec = parseNum($("h-run-sec").value);
+  const inp = {
+    sex: segValue("h-sex"),
+    age: parseNum($("h-age").value),
+    noAge: $("h-noage").checked,
+    sprint: parseNum($("h-sprint").value),
+    hang: parseNum($("h-hang").value),
+    runType: segValue("h-runtype"),
+    run: (runMin != null || runSec != null) ? (runMin ?? 0) * 60 + (runSec ?? 0) : null
+  };
+  const r = BFT.evaluate(inp);
+  if (!r.complete){ $("h-err").style.display = "block"; $("h-err").textContent = "Bitte Sprinttest, Klimmhang und Ausdauer vollständig eingeben."; return; }
+  const dv = $("h-date").value;
+  const ts = dv ? new Date(dv + "T12:00:00").getTime() : Date.now();
+  const entry = { date: ts, inp, total: r.total, grade: r.grade, note: r.noteText };
+  const list = load(HIST_KEY, []);
+  if (histEditIndex != null) list[histEditIndex] = entry; else list.unshift(entry);
+  list.sort((a, b) => b.date - a.date);
+  store(HIST_KEY, list.slice(0, 200));
+  closeModal("modal-hist");
+  renderHistory();
+});
 
 /* ---------- Prüfermodus ---------- */
 const PART_KEY = "bft_participants";
@@ -1176,7 +1287,7 @@ function renderPruefer(){
     html += "<tr><td><b>" + esc(p.name || "–") + "</b><br><span class='muted'>" + status + "</span></td>"
       + "<td>" + (p.sex === "w" ? "F" : "M") + (p.age ? " · " + p.age : "") + "</td>"
       + "<td>" + fmtSec(p.sprint) + "</td><td>" + fmtSec(p.hang) + "</td>"
-      + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (FET)" : "") + "</td>"
+      + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (Fahrradergometer)" : "") + "</td>"
       + '<td class="num"><b>' + (r.total ?? "–") + "</b></td>"
       + "<td>" + (r.grade ? esc(r.grade) + (r.noteText ? " (" + r.noteText + ")" : "") : "–") + "</td>"
       + '<td><button class="btn secondary small" data-pedit="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-pen"/></svg></button> '
@@ -1253,7 +1364,7 @@ function exportRows(){
       p.age != null ? String(p.age) : "-",
       p.sprint != null ? String(p.sprint).replace(".",",") + "s" : "-",
       p.hang != null ? String(p.hang).replace(".",",") + "s" : "-",
-      (p.run != null ? fmtTime(p.run) : "-") + (p.runType === "fet" ? " FET" : ""),
+      (p.run != null ? fmtTime(p.run) : "-") + (p.runType === "fet" ? " (Fahrradergometer)" : ""),
       r.total != null ? String(r.total) : "-",
       r.grade ? (r.grade + (r.noteText ? " (" + r.noteText + ")" : "")) : "-",
       !r.complete ? "unvollständig" : (r.allPass ? "bestanden" : "nicht bestanden")
