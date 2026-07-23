@@ -216,7 +216,7 @@
   .backlink{background:var(--panel);border:none;color:var(--accent2);font:inherit;font-weight:600;cursor:pointer;padding:6px 12px;border-radius:9px;margin-bottom:8px}
   .empty{color:var(--text2);text-align:center;padding:18px 8px;font-size:.9rem}
   .pill-status{font-size:.78rem;font-weight:700;border-radius:99px;padding:2px 9px;color:#fff;white-space:nowrap}
-  .premium-star{color:var(--gold)}
+  .premium-star{color:var(--gold);font-size:.82em}
   .mini-badge{display:inline-block;background:var(--gold);color:#fff;font-size:.64rem;font-weight:700;border-radius:6px;padding:1px 6px;white-space:nowrap;vertical-align:middle}
   .notice{background:var(--bg3);border-left:4px solid var(--accent2);border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--text2);margin:8px 0}
   .modal-back.drawer-back{display:flex;visibility:hidden;opacity:0;align-items:stretch;justify-content:flex-end;padding:0;transition:opacity .2s ease}
@@ -442,8 +442,8 @@
     <div id="pruefer-tab-erfassen">
       <div class="btn-row">
         <button class="btn" id="p-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Teilnehmer hinzufügen</button>
-        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export <span class="premium-star" id="p-export-star">★</span></button>
-        <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Drucken</button>
+        <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export <span class="premium-star" id="p-export-star">💎</span></button>
+        <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Drucken <span class="premium-star" id="p-print-star">💎</span></button>
         <button class="btn danger small" id="p-clear" style="margin-left:auto">Liste leeren</button>
       </div>
       <p class="muted on-bg" id="p-limit-info"></p>
@@ -640,7 +640,7 @@
       <summary><svg class="ic" aria-hidden="true"><use href="#i-diamond"/></svg> Premium</summary>
       <div class="acc-body">
         <p id="s-edition-status" class="muted"></p>
-        <button class="btn" id="s-premium">★ Premium ansehen</button>
+        <button class="btn" id="s-premium">💎 Premium ansehen</button>
       </div>
     </details>
 
@@ -756,11 +756,12 @@
 <div class="modal-back" id="modal-premium">
   <div class="modal" role="dialog" aria-modal="true" aria-label="Premium">
     <button class="iconbtn x" data-close="modal-premium" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
-    <h2>★ Premium – einmalig 2,99 €</h2>
+    <h2>💎 Premium – einmalig 2,99 €</h2>
     <ul>
       <li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg> Keine Werbung</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg> Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 3)</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Ergebnisliste als PDF, Bild oder Text exportieren</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Ergebnisliste drucken</li>
       <li><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg> Unterstützt die Weiterentwicklung</li>
     </ul>
     <div id="premium-buy-area"></div>
@@ -1261,7 +1262,7 @@ function renderHistory(){
   const list = load(HIST_KEY, []);
   const el = $("t-history");
   const premium = Edition.isPremium();
-  let html = '<div class="btn-row" style="margin:0 0 8px"><button class="btn secondary small" id="h-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Eintrag manuell anlegen' + (premium ? "" : ' <span class="premium-star">★</span>') + "</button></div>";
+  let html = '<div class="btn-row" style="margin:0 0 8px"><button class="btn secondary small" id="h-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Eintrag manuell anlegen' + (premium ? "" : ' <span class="premium-star">💎</span>') + "</button></div>";
   if (!list.length){
     html += '<div class="empty">Noch keine gespeicherten Ergebnisse. Nach der Eingabe auf „Im Verlauf speichern“ tippen' + (premium ? " oder oben manuell anlegen" : "") + ".</div>";
     el.innerHTML = html;
@@ -1358,6 +1359,7 @@ function renderPruefer(){
   const tb = $("p-tbody");
   $("p-empty").style.display = list.length ? "none" : "block";
   $("p-export-star").style.display = Edition.isPremium() ? "none" : "";
+  $("p-print-star").style.display = Edition.isPremium() ? "none" : "";
   $("p-limit-info").textContent = Edition.isPremium()
     ? "Premium: unbegrenzt viele Teilnehmer."
     : "Freie Version: bis zu " + Edition.FREE_LIMIT + " Teilnehmer (" + list.length + "/" + Edition.FREE_LIMIT + " belegt). Premium hebt das Limit auf.";
@@ -1578,6 +1580,7 @@ $("exp-img").addEventListener("click", exportImage);
 $("exp-txt").addEventListener("click", exportText);
 
 $("p-print").addEventListener("click", () => {
+  if (!Edition.isPremium()){ openPremium(); return; }
   $("view-pruefer").classList.add("print-me");
   Bridge.print();
   setTimeout(() => $("view-pruefer").classList.remove("print-me"), 1000);
@@ -1587,7 +1590,7 @@ $("p-print").addEventListener("click", () => {
 function openPremium(){
   const area = $("premium-buy-area");
   if (Edition.isPremium()){
-    area.innerHTML = '<p><b>★ Premium ist aktiv – danke für deine Unterstützung!</b></p>';
+    area.innerHTML = '<p><b>💎 Premium ist aktiv – danke für deine Unterstützung!</b></p>';
   } else if (Bridge.isNative()){
     /* In der Android-App: Kauf über Google Play Billing (wird in der App-Phase angebunden) */
     area.innerHTML = '<div class="btn-row"><button class="btn" id="premium-buy">Für 2,99 € freischalten</button></div>';
@@ -1644,7 +1647,7 @@ function renderBerechnung(){
   html += "<h3>Eigene Berechnungen</h3>";
   if (!Edition.isPremium()){
     html += '<div class="notice">Eigene Berechnungen sind eine Premium-Funktion: eigene Vorgaben anlegen, benennen und speichern.</div>'
-      + '<div class="btn-row"><button class="btn" id="s-calc-premium">★ Premium ansehen</button></div>';
+      + '<div class="btn-row"><button class="btn" id="s-calc-premium">💎 Premium ansehen</button></div>';
   } else {
     const activeId = a.id;
     html += '<div class="calc-line"><b>Standard (offiziell)</b>' + (activeId === "standard"
@@ -1784,7 +1787,7 @@ $("calc-save").addEventListener("click", () => {
 function renderSettings(){
   $("s-version").textContent = "v" + APP_VERSION;
   $("s-edition-status").innerHTML = Edition.isPremium()
-    ? "★ <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, Export (PDF/Bild/Text), eigene Berechnungen."
+    ? "💎 <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, Export (PDF/Bild/Text), Drucken, eigene Berechnungen."
     : "Aktuell: <b>Freie Version</b> (mit Werbung, max. " + Edition.FREE_LIMIT + " Teilnehmer im Prüfermodus).";
   renderBerechnung();
 }
