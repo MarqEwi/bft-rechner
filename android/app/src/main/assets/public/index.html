@@ -1050,19 +1050,23 @@ const Ads = {
   },
   async ensureInit(){
     if (this.plugin) return true;
-    if (!this.available()) return false;
+    if (!this.available()){ console.log("[Ads] nicht verfügbar (kein natives Capacitor)"); return false; }
     try {
       const p = window.Capacitor.registerPlugin("AdMob");
       await p.initialize({ initializeForTesting: true });
+      console.log("[Ads] AdMob initialisiert");
       p.addListener("bannerAdSizeChanged", info => {
+        console.log("[Ads] Banner-Größe: " + JSON.stringify(info));
         const h = info && info.height ? Math.max(0, Math.round(info.height)) : 0;
         document.documentElement.style.setProperty("--native-ad-h", h + "px");
         document.body.classList.toggle("native-ads", h > 0);
         updateAdbarH();
       });
+      p.addListener("bannerAdLoaded", () => console.log("[Ads] Banner geladen"));
+      p.addListener("bannerAdFailedToLoad", err => console.error("[Ads] Banner-Fehler: " + JSON.stringify(err)));
       this.plugin = p;
       return true;
-    } catch(e){ return false; }
+    } catch(e){ console.error("[Ads] Initialisierung fehlgeschlagen: " + (e && e.message ? e.message : e)); return false; }
   },
   async sync(){
     if (!this.available()) return;
@@ -1076,8 +1080,9 @@ const Ads = {
       }
       if (!(await this.ensureInit()) || this.showing) return;
       await this.plugin.showBanner({ adId: this.BANNER_ID, adSize: "ADAPTIVE_BANNER", position: "BOTTOM_CENTER", margin: 0, isTesting: true });
+      console.log("[Ads] showBanner aufgerufen");
       this.showing = true;
-    } catch(e){ /* Ohne Werbung weiterlaufen – die App bleibt voll nutzbar */ }
+    } catch(e){ console.error("[Ads] showBanner fehlgeschlagen: " + (e && e.message ? e.message : e)); /* App bleibt ohne Werbung voll nutzbar */ }
   }
 };
 
