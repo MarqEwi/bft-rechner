@@ -999,7 +999,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0.1";
+const APP_VERSION = "1.0.2";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
@@ -1053,14 +1053,15 @@ const Ads = {
   },
   BANNER_ID: "ca-app-pub-3940256099942544/6300978111", /* Google-Test-Banner */
   available(){
-    try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.registerPlugin); }
+    try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
     catch(e){ return false; }
   },
   async ensureInit(){
     if (this.plugin) return true;
     if (!this.available()){ this.log("nur Web (keine App-Werbung)"); return false; }
     try {
-      const p = window.Capacitor.registerPlugin("AdMob");
+      const p = window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
+      if (!p){ this.log("AdMob-Plugin nicht gefunden", true); return false; }
       await p.initialize({ initializeForTesting: true });
       this.log("AdMob initialisiert");
       p.addListener("bannerAdSizeChanged", info => {
@@ -1077,7 +1078,7 @@ const Ads = {
     } catch(e){ this.log("Init-Fehler: " + (e && e.message ? e.message : e), true); return false; }
   },
   async sync(){
-    if (!this.available()) return;
+    if (!this.available()){ this.log("nur Web (keine App-Werbung)"); return; }
     try {
       if (Edition.isPremium()){
         if (this.showing){ await this.plugin.removeBanner(); this.showing = false; }
