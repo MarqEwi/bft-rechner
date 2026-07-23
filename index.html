@@ -112,10 +112,19 @@
   label.field{display:block;margin:10px 0 2px;font-size:.86rem;color:var(--text2);font-weight:600}
   .checkline{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2);margin-top:7px;cursor:pointer}
   .checkline input{width:17px;height:17px;accent-color:#4a5d3a}
-  input[type=text],input[type=number],select{
+  .formula-hint{font-size:.84rem;color:var(--text2);margin:2px 0 4px}
+  .formula-hint b{color:var(--text);font-variant-numeric:tabular-nums}
+  input[type=text],input[type=number],input[type=date],select{
     width:100%;padding:10px 12px;font:inherit;color:var(--text);
     background:var(--bg3);border:1px solid var(--line);border-radius:10px}
   input:focus,select:focus{outline:2px solid var(--accent2);outline-offset:1px}
+  input[type=date]{color-scheme:light dark;position:relative;font-variant-numeric:tabular-nums}
+  input[type=date]::-webkit-calendar-picker-indicator{opacity:.65;cursor:pointer;filter:saturate(0)}
+  .subdetails{margin-top:8px;border-top:1px solid var(--line);padding-top:8px}
+  .subdetails>summary{cursor:pointer;list-style:none;font-weight:600;font-size:.84rem;color:var(--accent2);padding:4px 0}
+  .subdetails>summary::-webkit-details-marker{display:none}
+  .subdetails>summary::before{content:"▸ ";color:var(--accent2)}
+  .subdetails[open]>summary::before{content:"▾ "}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .time-pair{display:flex;gap:8px;align-items:center}
   .time-pair input{width:90px;text-align:center}
@@ -193,6 +202,7 @@
   .empty{color:var(--text2);text-align:center;padding:18px 8px;font-size:.9rem}
   .pill-status{font-size:.78rem;font-weight:700;border-radius:99px;padding:2px 9px;color:#fff;white-space:nowrap}
   .premium-star{color:var(--gold)}
+  .mini-badge{display:inline-block;background:var(--gold);color:#fff;font-size:.64rem;font-weight:700;border-radius:6px;padding:1px 6px;white-space:nowrap;vertical-align:middle}
   .notice{background:var(--bg3);border-left:4px solid var(--accent2);border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--text2);margin:8px 0}
   .modal-back.drawer-back{display:flex;visibility:hidden;opacity:0;align-items:stretch;justify-content:flex-end;padding:0;transition:opacity .2s ease}
   .modal-back.drawer-back.open{visibility:visible;opacity:1}
@@ -639,8 +649,7 @@
       <summary><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> Quellen</summary>
       <div class="acc-body">
         <ul class="muted" style="padding-left:1.2rem;font-size:.82rem">
-          <li>Zentralanweisung B1-224/0-2 „Ausbildung und Erhalt der Individuellen Grundfertigkeiten und der Körperlichen Leistungsfähigkeit“ – Basispunktetabellen zum BFT (Stand Mai 2015)</li>
-          <li>Weisung des Generalinspekteurs der Bundeswehr zur IGF/KLF vom 18.02.2013</li>
+          <li>Berechnung anhand Weisung (Stand Mai 2015)</li>
           <li>bundeswehr.de – Sport in der Bundeswehr: Basis-Fitness-Test</li>
         </ul>
       </div>
@@ -653,23 +662,26 @@
   <div class="modal" role="dialog" aria-modal="true" aria-label="Eigene Berechnung">
     <button class="iconbtn x" data-close="modal-calc" aria-label="Schließen"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     <h2 id="calc-title">Eigene Berechnung</h2>
-    <p class="muted">Lege fest, welche Leistung 100 Punkte (Mindestanforderung) und welche 400 Punkte (Bestwert) ergibt. Zwischenwerte werden linear berechnet.</p>
+    <p class="muted">Passe die Berechnungsformeln an. „Zeit“ ist die gemessene Zeit in Sekunden; das Ergebnis sind die Basispunkte der Disziplin.</p>
     <label class="field" for="calc-name">Name der Berechnung</label>
     <input type="text" id="calc-name" maxlength="40" placeholder="z. B. Vereinsvorgabe 2026">
-    <h3>Sprinttest (Sekunden)</h3>
+    <h3>11 × 10 m-Sprinttest</h3>
+    <p class="formula-hint">Punkte = <b>A − B × Sprintzeit</b></p>
     <div class="row2">
-      <div><label class="field" for="calc-sprint100">100 Punkte bei</label><input type="text" id="calc-sprint100" inputmode="decimal" placeholder="60"></div>
-      <div><label class="field" for="calc-sprint400">400 Punkte bei</label><input type="text" id="calc-sprint400" inputmode="decimal" placeholder="42"></div>
+      <div><label class="field" for="calc-s-a">A (Konstante)</label><input type="text" id="calc-s-a" inputmode="decimal" placeholder="1100"></div>
+      <div><label class="field" for="calc-s-b">B (Faktor)</label><input type="text" id="calc-s-b" inputmode="decimal" placeholder="16,667"></div>
     </div>
-    <h3>Klimmhang (Sekunden)</h3>
+    <h3>Klimmhang</h3>
+    <p class="formula-hint">Punkte = <b>A + B × Klimmhangzeit</b></p>
     <div class="row2">
-      <div><label class="field" for="calc-hang100">100 Punkte bei</label><input type="text" id="calc-hang100" inputmode="decimal" placeholder="5"></div>
-      <div><label class="field" for="calc-hang400">400 Punkte bei</label><input type="text" id="calc-hang400" inputmode="decimal" placeholder="65"></div>
+      <div><label class="field" for="calc-h-a">A (Konstante)</label><input type="text" id="calc-h-a" inputmode="decimal" placeholder="75"></div>
+      <div><label class="field" for="calc-h-b">B (Faktor)</label><input type="text" id="calc-h-b" inputmode="decimal" placeholder="5"></div>
     </div>
-    <h3>Ausdauer (min:sek)</h3>
+    <h3>1000-m-Lauf</h3>
+    <p class="formula-hint">Punkte = <b>100 + (Referenzzeit − Laufzeit) × C</b></p>
     <div class="row2">
-      <div><label class="field">100 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run100-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run100-sec" placeholder="sek" inputmode="numeric"></div></div>
-      <div><label class="field">400 Punkte bei</label><div class="time-pair"><input type="number" id="calc-run400-min" placeholder="min" inputmode="numeric"> : <input type="number" id="calc-run400-sec" placeholder="sek" inputmode="numeric"></div></div>
+      <div><label class="field" for="calc-r-ref">Referenzzeit (s)</label><input type="text" id="calc-r-ref" inputmode="decimal" placeholder="390"></div>
+      <div><label class="field" for="calc-r-c">C (Faktor)</label><input type="text" id="calc-r-c" inputmode="decimal" placeholder="1,81818181"></div>
     </div>
     <h3>Zuschläge</h3>
     <div class="row2">
@@ -839,7 +851,7 @@
 const Calc = {
   CUSTOM_KEY: "bft_customcalcs",
   ACTIVE_KEY: "bft_activecalc",
-  SOURCE: "Zentralanweisung B1-224/0-2 „Ausbildung und Erhalt der Individuellen Grundfertigkeiten und der Körperlichen Leistungsfähigkeit“ – Basispunktetabellen zum BFT",
+  SOURCE: "Berechnung anhand Weisung (Stand Mai 2015)",
   STAND: "Mai 2015",
   STANDARD: {
     id: "standard",
@@ -1114,7 +1126,7 @@ function segInit(id, onChange){
 /* ---------- Theme ---------- */
 const THEME_KEY = "bft_theme";
 function applyTheme(){
-  const t = load(THEME_KEY, "auto");
+  const t = load(THEME_KEY, "light");
   document.documentElement.dataset.theme = t;
   $("s-theme").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === t));
 }
@@ -1179,7 +1191,7 @@ segInit("t-runtype", tRender);
 $("t-save").addEventListener("click", () => {
   if (!tCurrent || !tCurrent.r.complete) return;
   const h = load(HIST_KEY, []);
-  h.unshift({ date: Date.now(), inp: tCurrent.inp, total: tCurrent.r.total, grade: tCurrent.r.grade, note: tCurrent.r.noteText });
+  h.unshift({ date: Date.now(), inp: tCurrent.inp, total: tCurrent.r.total, grade: tCurrent.r.grade, note: tCurrent.r.noteText, calc: Calc.isCustomActive() ? Calc.active().name : null });
   store(HIST_KEY, h.slice(0, 200));
   renderHistory();
 });
@@ -1202,7 +1214,7 @@ function renderHistory(){
     const d = new Date(x.date);
     html += "<tr><td>" + d.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit",year:"2-digit"}) + "</td>"
       + "<td>" + fmtSec(x.inp.sprint) + "</td><td>" + fmtSec(x.inp.hang) + "</td><td>" + fmtTime(x.inp.run) + "</td>"
-      + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + (x.note ? " (" + esc(x.note) + ")" : "") + "</td>"
+      + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + (x.note ? " (" + esc(x.note) + ")" : "") + (x.calc ? ' <span class="mini-badge" title="Eigene Berechnung: ' + esc(x.calc) + '">✦</span>' : "") + "</td>"
       + '<td style="white-space:nowrap"><button class="btn secondary small" data-hedit="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-pen"/></svg></button> '
       + '<button class="btn danger small" data-hdel="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></td></tr>';
   });
@@ -1256,7 +1268,7 @@ $("h-save").addEventListener("click", () => {
   if (!r.complete){ $("h-err").style.display = "block"; $("h-err").textContent = "Bitte Sprinttest, Klimmhang und Ausdauer vollständig eingeben."; return; }
   const dv = $("h-date").value;
   const ts = dv ? new Date(dv + "T12:00:00").getTime() : Date.now();
-  const entry = { date: ts, inp, total: r.total, grade: r.grade, note: r.noteText };
+  const entry = { date: ts, inp, total: r.total, grade: r.grade, note: r.noteText, calc: Calc.isCustomActive() ? Calc.active().name : null };
   const list = load(HIST_KEY, []);
   if (histEditIndex != null) list[histEditIndex] = entry; else list.unshift(entry);
   list.sort((a, b) => b.date - a.date);
@@ -1293,7 +1305,8 @@ function renderPruefer(){
     const r = BFT.evaluate(p);
     const status = !r.complete ? '<span class="pill-status" style="background:var(--text2)">unvollständig</span>'
       : '<span class="pill-status ' + (r.allPass ? "" : "") + '" style="background:var(--' + (r.allPass ? "ok" : "bad") + ')">' + (r.allPass ? "bestanden" : "nicht best.") + "</span>";
-    html += "<tr><td><b>" + esc(p.name || "–") + "</b><br><span class='muted'>" + status + "</span></td>"
+    const calcMark = Calc.isCustomActive() ? ' <span class="mini-badge" title="Eigene Berechnung: ' + esc(Calc.active().name) + '">✦ eigene</span>' : "";
+    html += "<tr><td><b>" + esc(p.name || "–") + "</b>" + calcMark + "<br><span class='muted'>" + status + "</span></td>"
       + "<td>" + (p.sex === "w" ? "F" : "M") + (p.age ? " · " + p.age : "") + "</td>"
       + "<td>" + fmtSec(p.sprint) + "</td><td>" + fmtSec(p.hang) + "</td>"
       + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (Fahrradergometer)" : "") + "</td>"
@@ -1548,18 +1561,24 @@ function renderBerechnung(){
   const el = $("s-berechnung"); if (!el) return;
   const a = Calc.active(), A = a.anchors, custom = a.id !== "standard";
   const runL = s => fmtTime(s) + " min";
+  const F = calcFormulas(a);
   let html = "";
   html += '<p style="margin-top:0"><b>Aktive Berechnung:</b> ' + esc(a.name) + (custom ? ' <span class="calc-badge">benutzerdefiniert</span>' : "") + "</p>";
-  html += '<div class="calc-line"><b>Sprinttest</b><span>' + fmtSec(A.sprint.p100) + " = 100 P · " + fmtSec(A.sprint.p400) + " = 400 P</span></div>";
-  html += '<div class="calc-line"><b>Klimmhang</b><span>' + A.hang.p100 + " s = 100 P · " + A.hang.p400 + " s = 400 P</span></div>";
-  html += '<div class="calc-line"><b>Ausdauer</b><span>' + runL(A.run.p100) + " = 100 P · " + runL(A.run.p400) + " = 400 P</span></div>";
+  html += '<div class="calc-line"><b>11 × 10 m-Sprinttest</b></div><p class="muted" style="margin:2px 0 8px;font-size:.84rem">Punkte = ' + esc(F.sprint) + "</p>";
+  html += '<div class="calc-line"><b>Klimmhang</b></div><p class="muted" style="margin:2px 0 8px;font-size:.84rem">Punkte = ' + esc(F.hang) + "</p>";
+  html += '<div class="calc-line"><b>1000-m-Lauf</b></div><p class="muted" style="margin:2px 0 8px;font-size:.84rem">Punkte = ' + esc(F.run) + "</p>";
   const S = a.surch || Calc.STANDARD.surch, pc = f => String(Math.round(f * 1000) / 10).replace(".", ",");
   html += '<div class="calc-line"><b>Zuschlag Frauen</b><span>Sprint +' + pc(S.gS) + " % · Klimmhang +" + pc(S.gH) + " % · 1000 m +" + pc(S.gR) + " %</span></div>";
   html += '<div class="calc-line"><b>Alterszuschlag</b><span>+' + pc(S.age) + " % pro Jahr ab 36</span></div>";
-  html += '<p class="muted" style="font-size:.82rem">Zwischenwerte linear. Note je Disziplin (100 P = ausreichend · 200 = zufriedenstellend · 300 = gut · ab 400 = sehr gut); Gesamtnote = Mittelwert der drei Disziplin-Noten (zwei Nachkommastellen).</p>';
   html += custom
     ? '<p class="muted" style="font-size:.82rem">Quelle: vom Nutzer angelegte Berechnung.</p>'
-    : '<p class="muted" style="font-size:.82rem">Quelle: ' + esc(Calc.SOURCE) + "<br>Stand: " + Calc.STAND + "</p>";
+    : '<p class="muted" style="font-size:.82rem">' + esc(Calc.SOURCE) + "</p>";
+  html += '<details class="subdetails"><summary>Vereinfachte Berechnung / Darstellung</summary>'
+    + '<div class="calc-line"><b>Sprinttest</b><span>' + fmtSec(A.sprint.p100) + " = 100 P · " + fmtSec(A.sprint.p400) + " = 400 P</span></div>"
+    + '<div class="calc-line"><b>Klimmhang</b><span>' + A.hang.p100 + " s = 100 P · " + A.hang.p400 + " s = 400 P</span></div>"
+    + '<div class="calc-line"><b>Ausdauer</b><span>' + runL(A.run.p100) + " = 100 P · " + runL(A.run.p400) + " = 400 P</span></div>"
+    + '<p class="muted" style="font-size:.82rem">Zwischenwerte linear. Note je Disziplin (100 P = ausreichend · 200 = zufriedenstellend · 300 = gut · ab 400 = sehr gut); Gesamtnote = Mittelwert der drei Disziplin-Noten (zwei Nachkommastellen).</p>'
+    + "</details>";
   if (custom) html += '<div class="btn-row"><button class="btn secondary" id="s-calc-reset">Berechnung auf Standard zurücksetzen</button></div>';
   html += "<h3>Eigene Berechnungen</h3>";
   if (!Edition.isPremium()){
@@ -1591,6 +1610,26 @@ function renderBerechnung(){
 }
 function onCalcChanged(){ renderBerechnung(); renderCalcBadges(); tRender(); renderPruefer(); }
 
+/* Anzeige der Berechnungsformeln (aus den Ankern abgeleitet) */
+function calcFormulas(calc){
+  if (calc.id === "standard"){
+    return {
+      sprint: "1.100 − 16,667 × Sprintzeit (s)",
+      hang: "75 + 5 × Klimmhangzeit (s)",
+      run: "100 + ((390 − Laufzeit) × 1,81818181)"
+    };
+  }
+  const A = calc.anchors, n = x => (Math.round(x * 100000) / 100000).toString().replace(".", ",");
+  const sb = 300 / (A.sprint.p100 - A.sprint.p400), sa = 100 + sb * A.sprint.p100;
+  const hb = 300 / (A.hang.p400 - A.hang.p100), ha = 100 - hb * A.hang.p100;
+  const rc = 300 / (A.run.p100 - A.run.p400);
+  return {
+    sprint: n(sa) + " − " + n(sb) + " × Sprintzeit (s)",
+    hang: n(ha) + " + " + n(hb) + " × Klimmhangzeit (s)",
+    run: "100 + ((" + n(A.run.p100) + " − Laufzeit) × " + n(rc) + ")"
+  };
+}
+
 /* ---------- Editor für eigene Berechnungen ---------- */
 let calcEditId = null;
 function openCalcEditor(id){
@@ -1599,12 +1638,17 @@ function openCalcEditor(id){
   const A = c ? c.anchors : Calc.STANDARD.anchors;
   $("calc-title").textContent = c ? "Berechnung bearbeiten" : "Eigene Berechnung";
   $("calc-name").value = c ? c.name : "";
-  $("calc-sprint100").value = String(A.sprint.p100).replace(".", ",");
-  $("calc-sprint400").value = String(A.sprint.p400).replace(".", ",");
-  $("calc-hang100").value = String(A.hang.p100).replace(".", ",");
-  $("calc-hang400").value = String(A.hang.p400).replace(".", ",");
-  $("calc-run100-min").value = Math.floor(A.run.p100 / 60); $("calc-run100-sec").value = A.run.p100 % 60;
-  $("calc-run400-min").value = Math.floor(A.run.p400 / 60); $("calc-run400-sec").value = A.run.p400 % 60;
+  const n = x => (Math.round(x * 100000) / 100000).toString().replace(".", ",");
+  if (!c || c.id === "standard"){
+    $("calc-s-a").value = "1100"; $("calc-s-b").value = "16,667";
+    $("calc-h-a").value = "75"; $("calc-h-b").value = "5";
+    $("calc-r-ref").value = "390"; $("calc-r-c").value = "1,81818181";
+  } else {
+    const sb = 300 / (A.sprint.p100 - A.sprint.p400), hb = 300 / (A.hang.p400 - A.hang.p100), rc = 300 / (A.run.p100 - A.run.p400);
+    $("calc-s-a").value = n(100 + sb * A.sprint.p100); $("calc-s-b").value = n(sb);
+    $("calc-h-a").value = n(100 - hb * A.hang.p100); $("calc-h-b").value = n(hb);
+    $("calc-r-ref").value = n(A.run.p100); $("calc-r-c").value = n(rc);
+  }
   const S = (c && c.surch) ? c.surch : Calc.STANDARD.surch;
   $("calc-gs").value = String(Math.round(S.gS * 1000) / 10).replace(".", ",");
   $("calc-gh").value = String(Math.round(S.gH * 1000) / 10).replace(".", ",");
@@ -1616,20 +1660,24 @@ function openCalcEditor(id){
 }
 $("calc-save").addEventListener("click", () => {
   const name = $("calc-name").value.trim();
-  const s100 = parseNum($("calc-sprint100").value), s400 = parseNum($("calc-sprint400").value);
-  const hg100 = parseNum($("calc-hang100").value), hg400 = parseNum($("calc-hang400").value);
-  const r100 = (parseNum($("calc-run100-min").value) || 0) * 60 + (parseNum($("calc-run100-sec").value) || 0);
-  const r400 = (parseNum($("calc-run400-min").value) || 0) * 60 + (parseNum($("calc-run400-sec").value) || 0);
+  const sa = parseNum($("calc-s-a").value), sb = parseNum($("calc-s-b").value);
+  const ha = parseNum($("calc-h-a").value), hb = parseNum($("calc-h-b").value);
+  const rref = parseNum($("calc-r-ref").value), rc = parseNum($("calc-r-c").value);
   const gs = parseNum($("calc-gs").value), gh = parseNum($("calc-gh").value), gr = parseNum($("calc-gr").value), ag = parseNum($("calc-age").value);
   const err = [];
   if (!name) err.push("Bitte einen Namen angeben.");
-  if (!(s100 > 0) || !(s400 > 0) || s400 >= s100) err.push("Sprinttest: die 400-Punkte-Zeit muss schneller (kleiner) sein als die 100-Punkte-Zeit.");
-  if (!(hg100 >= 0) || !(hg400 > hg100)) err.push("Klimmhang: der 400-Punkte-Wert muss größer sein als der 100-Punkte-Wert.");
-  if (!(r100 > 0) || !(r400 > 0) || r400 >= r100) err.push("Ausdauer: die 400-Punkte-Zeit muss schneller (kleiner) sein als die 100-Punkte-Zeit.");
+  if (!(sb > 0) || !(sa > 400)) err.push("Sprinttest: A muss größer als 400 und B größer als 0 sein.");
+  if (!(hb > 0) || !(ha < 100)) err.push("Klimmhang: B muss größer als 0 und A kleiner als 100 sein.");
+  if (!(rc > 0) || !(rref > 300 / (rc || 1))) err.push("1000-m-Lauf: C muss größer als 0 und die Referenzzeit ausreichend groß sein.");
   if ([gs, gh, gr, ag].some(v => v == null || v < 0)) err.push("Zuschläge müssen 0 oder größer sein (in Prozent).");
   if (err.length){ $("calc-err").style.display = "block"; $("calc-err").innerHTML = err.join("<br>"); return; }
+  const anchors = {
+    sprint: { p100: (sa - 100) / sb, p400: (sa - 400) / sb },
+    hang:   { p100: (100 - ha) / hb, p400: (400 - ha) / hb },
+    run:    { p100: rref, p400: rref - 300 / rc }
+  };
   const id = calcEditId || ("c" + Date.now().toString(36));
-  Calc.saveCustom({ id, name, anchors: { sprint:{p100:s100, p400:s400}, hang:{p100:hg100, p400:hg400}, run:{p100:r100, p400:r400} }, surch: { gS: gs/100, gH: gh/100, gR: gr/100, age: ag/100 } });
+  Calc.saveCustom({ id, name, anchors, surch: { gS: gs/100, gH: gh/100, gR: gr/100, age: ag/100 } });
   Calc.setActive(id);
   closeModal("modal-calc");
   onCalcChanged();
