@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BFT Rechner – Basis-Fitness-Test Punkterechner (inoffiziell)</title>
+<meta name="description" content="Inoffizieller Punkterechner für den Basis-Fitness-Test (BFT): 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf eingeben, Punkte und Note berechnen. Mit Prüfermodus für Gruppen. Kein Angebot der Bundeswehr.">
+<meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171a14" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%233d4a33"/><circle cx="32" cy="36" r="17" fill="none" stroke="%23e8ecdf" stroke-width="4"/><rect x="27" y="12" width="10" height="5" rx="2" fill="%23e8ecdf"/><line x1="32" y1="36" x2="32" y2="25" stroke="%23b8c94a" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="36" x2="40" y2="41" stroke="%23e8ecdf" stroke-width="3.4" stroke-linecap="round"/></svg>'>
+<style>
+  :root{
+    --bg:#f5f6f2; --bg2:#ffffff; --bg3:#eceee6; --text:#20241c; --text2:#5b6152;
+    --line:#d9dccf; --accent:#4a5d3a; --accent2:#6d8250; --accent-text:#ffffff;
+    --gold:#b8952f; --ok:#2e7d32; --good:#558b2f; --mid:#b58900; --low:#c96d00; --bad:#c62828;
+    --shadow:0 2px 10px rgba(32,36,28,.08); --radius:14px;
+  }
+  html[data-theme="dark"]{
+    --bg:#171a14; --bg2:#20241c; --bg3:#282d22; --text:#e8ecdf; --text2:#a2a893;
+    --line:#3a4032; --accent:#8ba36b; --accent2:#a5bd85; --accent-text:#141810;
+    --gold:#d4b04a; --ok:#7cc47f; --good:#a5c968; --mid:#d9b544; --low:#e09550; --bad:#e57373;
+    --shadow:0 2px 10px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    html[data-theme="auto"]{
+      --bg:#171a14; --bg2:#20241c; --bg3:#282d22; --text:#e8ecdf; --text2:#a2a893;
+      --line:#3a4032; --accent:#8ba36b; --accent2:#a5bd85; --accent-text:#141810;
+      --gold:#d4b04a; --ok:#7cc47f; --good:#a5c968; --mid:#d9b544; --low:#e09550; --bad:#e57373;
+      --shadow:0 2px 10px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5; min-height:100dvh; display:flex; flex-direction:column;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  header.app{
+    position:sticky; top:0; z-index:30; background:var(--bg2); border-bottom:1px solid var(--line);
+    padding:10px 14px calc(10px); padding-top:calc(10px + env(safe-area-inset-top));
+    display:flex; align-items:center; gap:10px;
+  }
+  header.app .logo{width:34px;height:34px;flex:none}
+  header.app h1{font-size:1.12rem;margin:0;line-height:1.2}
+  header.app .sub{font-size:.72rem;color:var(--text2);display:block;font-weight:400}
+  .badge-inoff{font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);
+    color:var(--text2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+  .spacer{flex:1}
+  .iconbtn{background:none;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:grid;place-items:center}
+  .iconbtn:hover{background:var(--bg3)}
+  main{flex:1;width:100%;max-width:760px;margin:0 auto;padding:16px 14px 90px}
+  h2{font-size:1.25rem;margin:.2rem 0 .6rem}
+  h3{font-size:1.02rem;margin:1rem 0 .4rem}
+  p{margin:.4rem 0}
+  .muted{color:var(--text2);font-size:.86rem}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 16px;margin:10px 0}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;
+    background:var(--accent);color:var(--accent-text);font:inherit;font-weight:600;
+    padding:10px 18px;border-radius:11px}
+  .btn:hover{background:var(--accent2)}
+  .btn.secondary{background:var(--bg3);color:var(--text);border:1px solid var(--line)}
+  .btn.small{padding:6px 12px;font-size:.85rem;border-radius:9px}
+  .btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  /* Startseite */
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media(max-width:520px){.mode-grid{grid-template-columns:1fr}}
+  .mode-card{display:block;text-align:left;background:var(--bg2);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;cursor:pointer;font:inherit;color:var(--text)}
+  .mode-card:hover{border-color:var(--accent)}
+  .mode-card .emoji{font-size:1.9rem}
+  .mode-card b{display:block;font-size:1.08rem;margin:6px 0 2px}
+  .mode-card span{color:var(--text2);font-size:.86rem}
+  .quickfacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  @media(max-width:520px){.quickfacts{grid-template-columns:1fr}}
+  .quickfacts .qf{background:var(--bg3);border-radius:10px;padding:10px;font-size:.8rem;color:var(--text2)}
+  .quickfacts .qf b{display:block;color:var(--text);font-size:.9rem}
+  /* Formulare */
+  label.field{display:block;margin:10px 0 2px;font-size:.86rem;color:var(--text2);font-weight:600}
+  input[type=text],input[type=number],select{
+    width:100%;padding:10px 12px;font:inherit;color:var(--text);
+    background:var(--bg3);border:1px solid var(--line);border-radius:10px}
+  input:focus,select:focus{outline:2px solid var(--accent2);outline-offset:1px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .time-pair{display:flex;gap:8px;align-items:center}
+  .time-pair input{width:90px;text-align:center}
+  .seg{display:flex;background:var(--bg3);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;margin:4px 0}
+  .seg button{flex:1;border:none;background:none;color:var(--text2);font:inherit;font-size:.86rem;
+    padding:7px 6px;border-radius:8px;cursor:pointer}
+  .seg button.active{background:var(--accent);color:var(--accent-text);font-weight:600}
+  /* Ergebnis */
+  .disc-result{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .disc-result .name{flex:1;min-width:0}
+  .disc-result .name b{font-size:.92rem}
+  .disc-result .name span{display:block;font-size:.76rem;color:var(--text2)}
+  .disc-result .pts{font-weight:700;font-variant-numeric:tabular-nums;width:74px;text-align:right}
+  .bar{height:8px;border-radius:6px;background:var(--bg3);overflow:hidden;flex:1.4}
+  .bar i{display:block;height:100%;background:var(--accent2);border-radius:6px;transition:width .3s}
+  .total-box{display:flex;align-items:center;gap:14px;border-top:1px dashed var(--line);margin-top:12px;padding-top:12px}
+  .total-box .sum{font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums}
+  .grade{display:inline-block;padding:4px 12px;border-radius:99px;font-weight:700;font-size:.9rem;color:#fff}
+  .g-sehrgut{background:var(--ok)} .g-gut{background:var(--good)} .g-befr{background:var(--mid)}
+  .g-ausr{background:var(--low)} .g-fail{background:var(--bad)}
+  .hint-fail{color:var(--bad);font-size:.82rem;margin-top:4px}
+  /* Tabellen */
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{color:var(--text2);font-size:.76rem;text-transform:uppercase;letter-spacing:.03em}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  /* Tabs im Prüfermodus */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .tabs button{background:none;border:none;font:inherit;color:var(--text2);padding:9px 12px;cursor:pointer;
+    border-bottom:2.5px solid transparent;font-weight:600;font-size:.9rem}
+  .tabs button.active{color:var(--text);border-bottom-color:var(--accent)}
+  /* Akkordeon */
+  details.station{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--bg2);overflow:hidden}
+  details.station summary{cursor:pointer;padding:12px 14px;font-weight:700;list-style:none;display:flex;gap:10px;align-items:center}
+  details.station summary::-webkit-details-marker{display:none}
+  details.station summary .num{background:var(--accent);color:var(--accent-text);border-radius:8px;
+    width:26px;height:26px;display:grid;place-items:center;font-size:.85rem;flex:none}
+  details.station[open] summary{border-bottom:1px solid var(--line)}
+  details.station .inner{padding:4px 16px 12px}
+  details.station ul{margin:.3rem 0 .6rem;padding-left:1.2rem}
+  details.station li{margin:.22rem 0;font-size:.9rem}
+  .tag{display:inline-block;background:var(--bg3);border-radius:7px;padding:2px 8px;font-size:.76rem;color:var(--text2);margin:2px 3px 2px 0}
+  /* Modals */
+  .modal-back{position:fixed;inset:0;background:rgba(10,12,8,.55);z-index:50;display:none;
+    align-items:flex-end;justify-content:center;padding:0}
+  .modal-back.open{display:flex}
+  @media(min-width:560px){.modal-back{align-items:center;padding:20px}}
+  .modal{background:var(--bg2);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto;
+    border-radius:18px 18px 0 0;padding:18px 18px 22px;border:1px solid var(--line)}
+  @media(min-width:560px){.modal{border-radius:18px}}
+  .modal h2{margin-top:0}
+  .modal .x{float:right;margin:-4px -4px 0 8px}
+  /* Onboarding */
+  .ob-step{display:none;text-align:center;padding:8px 4px}
+  .ob-step.active{display:block}
+  .ob-step .emoji{font-size:2.6rem}
+  .ob-dots{text-align:center;margin:10px 0}
+  .ob-dots i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin:0 3px}
+  .ob-dots i.on{background:var(--accent)}
+  /* Werbung (Platzhalter in der freien Edition) */
+  #adbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--bg2);
+    border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom));
+    display:none;align-items:center;gap:10px;font-size:.78rem;color:var(--text2)}
+  body.edition-free #adbar{display:flex}
+  body.edition-free main{padding-bottom:130px}
+  #adbar .adlabel{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.62rem;text-transform:uppercase;flex:none}
+  #adbar a{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
+  footer.app{border-top:1px solid var(--line);color:var(--text2);font-size:.76rem;
+    padding:14px;text-align:center}
+  footer.app a{color:var(--text2)}
+  .view{display:none}.view.active{display:block}
+  .backlink{background:none;border:none;color:var(--accent2);font:inherit;font-weight:600;cursor:pointer;padding:0;margin-bottom:6px}
+  .empty{color:var(--text2);text-align:center;padding:18px 8px;font-size:.9rem}
+  .pill-status{font-size:.78rem;font-weight:700;border-radius:99px;padding:2px 9px;color:#fff;white-space:nowrap}
+  .premium-star{color:var(--gold)}
+  .notice{background:var(--bg3);border-left:4px solid var(--accent2);border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--text2);margin:8px 0}
+  /* Druck: nur Ergebnisliste */
+  @media print{
+    body{background:#fff;color:#000}
+    header.app,#adbar,footer.app,.tabs,.btn,.btn-row,.iconbtn,.backlink,.notice{display:none !important}
+    .view{display:none}.view.print-me{display:block !important}
+    .card{border:none;box-shadow:none;padding:0}
+    #pruefer-tab-aufbau{display:none !important}
+    #pruefer-tab-erfassen{display:block !important}
+  }
+</style>
+</head>
+<body class="edition-free">
+
+<header class="app">
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#3d4a33"/><circle cx="32" cy="36" r="17" fill="none" stroke="#e8ecdf" stroke-width="4"/><rect x="27" y="12" width="10" height="5" rx="2" fill="#e8ecdf"/><line x1="32" y1="36" x2="32" y2="25" stroke="#b8c94a" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="36" x2="40" y2="41" stroke="#e8ecdf" stroke-width="3.4" stroke-linecap="round"/></svg>
+  <h1>BFT Rechner<span class="sub">Basis-Fitness-Test · Punkte &amp; Noten</span></h1>
+  <span class="badge-inoff" title="Privates Projekt – kein Angebot der Bundeswehr">inoffiziell</span>
+  <span class="spacer"></span>
+  <button class="iconbtn" id="btn-settings" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
+</header>
+
+<main>
+
+  <!-- ===== Startseite ===== -->
+  <section class="view active" id="view-home">
+    <h2>Wie möchtest du starten?</h2>
+    <div class="mode-grid">
+      <button class="mode-card" id="go-teilnehmer">
+        <span class="emoji">🏃</span>
+        <b>Teilnehmer</b>
+        <span>Eigene Leistungen eingeben, Punkte und Note sofort berechnen, Verlauf speichern.</span>
+      </button>
+      <button class="mode-card" id="go-pruefer">
+        <span class="emoji">📋</span>
+        <b>Prüfer</b>
+        <span>Mehrere Teilnehmer erfassen, Ergebnisliste führen, Aufbau- und Ablaufanleitung nachschlagen.</span>
+      </button>
+    </div>
+    <div class="quickfacts">
+      <div class="qf"><b>11×10-m-Sprinttest</b>max. 60,0 s<br>(= 100 Punkte)</div>
+      <div class="qf"><b>Klimmhang</b>min. 5 s<br>(= 100 Punkte)</div>
+      <div class="qf"><b>1000-m-Lauf / FET 3000 m</b>max. 6:30 min<br>(= 100 Punkte)</div>
+    </div>
+    <p class="muted" style="margin-top:12px">In jeder Disziplin sind mindestens 100 Punkte nötig, sonst gilt der Test als nicht bestanden. Gesamtnote aus der Punktsumme aller drei Disziplinen.</p>
+  </section>
+
+  <!-- ===== Teilnehmer ===== -->
+  <section class="view" id="view-teilnehmer">
+    <button class="backlink" data-nav="home">← Zurück zur Startseite</button>
+    <h2>🏃 Teilnehmer – Punkte berechnen</h2>
+
+    <div class="card">
+      <label class="field">Wertungsgruppe</label>
+      <div class="seg" id="t-sex">
+        <button data-v="m" class="active">Männer</button>
+        <button data-v="w">Frauen (mit Zuschlag)</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="field" for="t-age">Alter (optional)</label>
+          <input type="number" id="t-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+        </div>
+        <div>
+          <label class="field" for="t-sprint">11×10-m-Sprinttest (Sekunden)</label>
+          <input type="text" id="t-sprint" inputmode="decimal" placeholder="z. B. 47,5">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="field" for="t-hang">Klimmhang (Sekunden)</label>
+          <input type="text" id="t-hang" inputmode="decimal" placeholder="z. B. 38">
+        </div>
+        <div>
+          <label class="field">Ausdauer-Disziplin</label>
+          <div class="seg" id="t-runtype">
+            <button data-v="lauf" class="active">1000-m-Lauf</button>
+            <button data-v="fet">FET 3000 m</button>
+          </div>
+          <div class="time-pair">
+            <input type="number" id="t-run-min" min="2" max="10" inputmode="numeric" placeholder="min"> :
+            <input type="number" id="t-run-sec" min="0" max="59" inputmode="numeric" placeholder="sek">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="t-result">
+      <h3 style="margin-top:0">Ergebnis</h3>
+      <div class="disc-result">
+        <div class="name"><b>Sprinttest</b><span id="t-r-sprint-sub">–</span></div>
+        <div class="bar"><i id="t-r-sprint-bar" style="width:0%"></i></div>
+        <div class="pts" id="t-r-sprint-pts">–</div>
+      </div>
+      <div class="disc-result">
+        <div class="name"><b>Klimmhang</b><span id="t-r-hang-sub">–</span></div>
+        <div class="bar"><i id="t-r-hang-bar" style="width:0%"></i></div>
+        <div class="pts" id="t-r-hang-pts">–</div>
+      </div>
+      <div class="disc-result">
+        <div class="name"><b id="t-r-run-name">1000-m-Lauf</b><span id="t-r-run-sub">–</span></div>
+        <div class="bar"><i id="t-r-run-bar" style="width:0%"></i></div>
+        <div class="pts" id="t-r-run-pts">–</div>
+      </div>
+      <div class="total-box">
+        <div>
+          <div class="muted" style="font-size:.76rem">Gesamtpunkte</div>
+          <div class="sum" id="t-r-total">–</div>
+        </div>
+        <div class="spacer"></div>
+        <span class="grade g-ausr" id="t-r-grade" style="visibility:hidden">–</span>
+      </div>
+      <div id="t-r-failhint" class="hint-fail" style="display:none"></div>
+      <div class="btn-row">
+        <button class="btn" id="t-save" disabled>💾 Im Verlauf speichern</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">📈 Mein Verlauf</h3>
+      <div id="t-history"></div>
+    </div>
+  </section>
+
+  <!-- ===== Prüfer ===== -->
+  <section class="view" id="view-pruefer">
+    <button class="backlink" data-nav="home">← Zurück zur Startseite</button>
+    <h2>📋 Prüfermodus</h2>
+    <div class="tabs">
+      <button id="ptab-erfassen-btn" class="active">Teilnehmer erfassen</button>
+      <button id="ptab-aufbau-btn">Aufbau &amp; Ablauf</button>
+    </div>
+
+    <div id="pruefer-tab-erfassen">
+      <div class="btn-row">
+        <button class="btn" id="p-add">＋ Teilnehmer hinzufügen</button>
+        <button class="btn secondary" id="p-export">⬇️ CSV-Export <span class="premium-star" id="p-export-star">★</span></button>
+        <button class="btn secondary" id="p-print">🖨️ Drucken</button>
+        <button class="btn danger small" id="p-clear" style="margin-left:auto">Liste leeren</button>
+      </div>
+      <p class="muted" id="p-limit-info"></p>
+      <div class="card">
+        <div class="tablewrap">
+          <table id="p-table">
+            <thead><tr>
+              <th>Name</th><th>Wertung</th><th>Sprint</th><th>Klimmhang</th><th id="p-th-run">Ausdauer</th>
+              <th style="text-align:right">Punkte</th><th>Note</th><th></th>
+            </tr></thead>
+            <tbody id="p-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="p-empty">Noch keine Teilnehmer erfasst. Über „＋ Teilnehmer hinzufügen“ startest du die Liste.</div>
+      </div>
+    </div>
+
+    <div id="pruefer-tab-aufbau" style="display:none">
+      <p class="muted">Kompakte Anleitung für Aufbau und Durchführung der drei BFT-Stationen. Reihenfolge ist verbindlich: Sprinttest → Klimmhang → Ausdauer. Gesamtzeit für alle drei Disziplinen: 90 Minuten.</p>
+
+      <details class="station" open>
+        <summary><span class="num">1</span> 11×10-m-Sprinttest (Pendellauf)</summary>
+        <div class="inner">
+          <span class="tag">Material</span>
+          <ul>
+            <li>1 Turnmatte (Start/Wende), 1 Pylone, Maßband, Stoppuhr</li>
+            <li>Ebener, rutschfester Boden (Halle), 10 m frei vermessene Strecke plus Auslauf</li>
+          </ul>
+          <span class="tag">Aufbau</span>
+          <ul>
+            <li>Matte an der Startlinie auslegen, Pylone exakt 10 m entfernt aufstellen</li>
+            <li>Bei mehreren Bahnen: mindestens 1,5 m Seitenabstand zwischen den Bahnen</li>
+          </ul>
+          <span class="tag">Durchführung</span>
+          <ul>
+            <li>Start in Bauchlage auf der Matte, Hände berühren sich hinter dem Rücken</li>
+            <li>Auf Pfiff aufstehen, Pylone umlaufen, zurück zur Matte, wieder Bauchlage einnehmen und Hände hinter dem Rücken zusammenführen</li>
+            <li>Insgesamt 11 Teilstrecken à 10 m; nach dem 6. Aufstehen nur noch bis zur Pylone sprinten – dort Zeit stoppen</li>
+          </ul>
+          <span class="tag">Bewertung</span>
+          <ul>
+            <li>Maximalzeit 60,0 s = 100 Punkte (Mindestanforderung), ab 41,99 s „sehr gut“ (400 Punkte)</li>
+          </ul>
+          <span class="tag">Häufige Fehler</span>
+          <ul>
+            <li>Pylone nicht vollständig umlaufen, Bauchlage nicht eingenommen, Hände nicht hinter dem Rücken zusammengeführt</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="station">
+        <summary><span class="num">2</span> Klimmhang</summary>
+        <div class="inner">
+          <span class="tag">Material</span>
+          <ul>
+            <li>Klimmzugstange (sicher montiert), Starthilfe (Kasten/Hocker), Matte darunter, Stoppuhr</li>
+          </ul>
+          <span class="tag">Durchführung</span>
+          <ul>
+            <li>Teilnehmer steigt auf die Starthilfe und greift die Stange etwa schulterbreit, Kinn über der Stange</li>
+            <li>Mit dem Startsignal wird die Starthilfe entfernt – der Teilnehmer hängt frei</li>
+            <li>Die Zeit läuft, solange sich das Kinn über der Stange befindet (ohne auf der Stange abzulegen)</li>
+            <li>Zeit stoppen, sobald das Kinn unter die Stange sinkt oder auf der Stange abgelegt wird</li>
+          </ul>
+          <span class="tag">Bewertung</span>
+          <ul>
+            <li>Mindestens 5 s = 100 Punkte · 45 s = 300 Punkte („gut“) · ab 65 s = 400 Punkte („sehr gut“)</li>
+          </ul>
+          <span class="tag">Sicherheit</span>
+          <ul>
+            <li>Matte unter der Stange, Hilfestellung beim Absteigen, Stange vorher auf festen Sitz prüfen</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="station">
+        <summary><span class="num">3</span> 1000-m-Lauf oder Fahrradergometer (FET 3000 m)</summary>
+        <div class="inner">
+          <span class="tag">1000-m-Lauf</span>
+          <ul>
+            <li>400-m-Bahn oder exakt vermessene, ebene Strecke; Startlinie markieren, Stoppuhr/Zeitnahme je Teilnehmer</li>
+            <li>Maximalzeit 6:30 min = 100 Punkte</li>
+          </ul>
+          <span class="tag">Alternative: Fahrradergometer-Test (FET)</span>
+          <ul>
+            <li>Computergestütztes Ergometer, Strecke 3000 m, ebenfalls in maximal 6:30 min</li>
+            <li>Anfangslast 130 Watt bei 80 Umdrehungen pro Minute; Sattel-/Lenkerhöhe vorab einstellen</li>
+            <li>Vollautomatische Auswertung über die Computerdaten</li>
+          </ul>
+          <span class="tag">Hinweis</span>
+          <ul>
+            <li>Je nach Wetterlage bzw. Vorgabe entscheidet die Prüfungsleitung, welche Variante durchgeführt wird</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="station">
+        <summary><span class="num">ℹ</span> Gesamtablauf &amp; Regeln</summary>
+        <div class="inner">
+          <ul>
+            <li>Alle drei Disziplinen werden nacheinander innerhalb von 90 Minuten absolviert</li>
+            <li>Vorzeitiger Abbruch einer Disziplin oder Überschreiten der Maximalzeit → Test insgesamt nicht bestanden</li>
+            <li>In jeder Disziplin sind mindestens 100 Punkte erforderlich</li>
+            <li>Frauen erhalten einen Leistungszuschlag: 15 % bei Sprinttest und Ausdauer, 40 % beim Klimmhang (Mindestanforderungen gelten unverändert für alle)</li>
+            <li>Bewerbende können den BFT bei Nichtbestehen nach 6 Monaten wiederholen; Soldatinnen und Soldaten absolvieren ihn jährlich</li>
+            <li>Vor Beginn: Erwärmung ermöglichen, Sportkleidung/Hallenschuhe, Gesundheitszustand erfragen</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<!-- Werbe-Platzhalter (nur freie Edition) -->
+<div id="adbar">
+  <span class="adlabel">Anzeige</span>
+  <span style="flex:1">Werbefrei &amp; alle Prüfer-Extras: Premium für einmalig 2,99&nbsp;€.</span>
+  <a href="#" id="ad-premium-link">Mehr&nbsp;erfahren</a>
+</div>
+
+<footer class="app">
+  Inoffizielle App · privates Projekt von Merc Studios · kein Angebot der Bundeswehr · alle Angaben ohne Gewähr<br>
+  <a href="datenschutz.html">Datenschutz &amp; Impressum</a> · <a href="#" id="foot-sources">Quellen</a>
+</footer>
+
+<!-- ===== Onboarding ===== -->
+<div class="modal-back" id="modal-onboarding">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Einführung">
+    <div class="ob-step active" data-step="0">
+      <div class="emoji">🎖️</div>
+      <h2>Willkommen beim BFT Rechner!</h2>
+      <p>Berechne Punkte und Note für den Basis-Fitness-Test: 11×10-m-Sprinttest, Klimmhang und 1000-m-Lauf (oder Fahrradergometer).</p>
+      <p class="muted">Inoffizielle App – privates Projekt, kein Angebot der Bundeswehr.</p>
+    </div>
+    <div class="ob-step" data-step="1">
+      <div class="emoji">🏃📋</div>
+      <h2>Zwei Modi</h2>
+      <p><b>Teilnehmer:</b> eigene Zeiten eingeben, sofort Punkte und Note sehen, Fortschritt im Verlauf speichern.</p>
+      <p><b>Prüfer:</b> ganze Gruppen erfassen, Ergebnisliste führen und die Aufbau-Anleitung für alle Stationen nachschlagen.</p>
+    </div>
+    <div class="ob-step" data-step="2">
+      <div class="emoji">🔒</div>
+      <h2>Deine Daten bleiben bei dir</h2>
+      <p>Alle Eingaben werden nur lokal auf deinem Gerät gespeichert – kein Konto, kein Server, kein Tracking.</p>
+      <p class="muted">Diese Einführung findest du jederzeit wieder in den Einstellungen.</p>
+    </div>
+    <div class="ob-dots" id="ob-dots"><i class="on"></i><i></i><i></i></div>
+    <div class="btn-row" style="justify-content:space-between">
+      <button class="btn secondary" id="ob-skip">Überspringen</button>
+      <button class="btn" id="ob-next">Weiter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Einstellungen ===== -->
+<div class="modal-back" id="modal-settings">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Einstellungen">
+    <button class="iconbtn x" data-close="modal-settings" aria-label="Schließen">✕</button>
+    <h2>⚙️ Einstellungen</h2>
+    <label class="field">Design</label>
+    <div class="seg" id="s-theme">
+      <button data-v="auto">System</button>
+      <button data-v="light">Hell</button>
+      <button data-v="dark">Dunkel</button>
+    </div>
+    <h3>Edition</h3>
+    <p id="s-edition-status" class="muted"></p>
+    <div class="btn-row">
+      <button class="btn" id="s-premium">★ Premium ansehen</button>
+      <button class="btn secondary" id="s-onboarding">Einführung erneut zeigen</button>
+    </div>
+    <h3>Über diese App</h3>
+    <p class="muted">BFT Rechner <span id="s-version"></span> · privates Projekt von Merc Studios.
+      Inoffizielle App, kein Angebot der Bundeswehr; „Basis-Fitness-Test“ wird nur beschreibend verwendet.
+      Punktberechnung nach öffentlich zugänglichen Angaben, ohne Gewähr – maßgeblich ist stets die offizielle Wertung.
+      Ein Alterszuschlag ist offiziell vorgesehen, in dieser Version aber noch nicht enthalten (Berechnung ohne Alterszuschlag).</p>
+    <p class="muted"><a href="datenschutz.html">Datenschutzerklärung &amp; Impressum</a></p>
+    <h3>Quellen</h3>
+    <ul class="muted" style="padding-left:1.2rem;font-size:.82rem">
+      <li>bundeswehr.de – Sport in der Bundeswehr: Basis-Fitness-Test</li>
+      <li>Informationsblatt „Sporttest Basis-Fitness-Test“ (Bewerbende SaZ)</li>
+      <li>einstellungstest-bundeswehr.de – Bundeswehr Sporttest</li>
+      <li>Wikipedia: Basis-Fitness-Test</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== Premium ===== -->
+<div class="modal-back" id="modal-premium">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Premium">
+    <button class="iconbtn x" data-close="modal-premium" aria-label="Schließen">✕</button>
+    <h2>★ Premium – einmalig 2,99 €</h2>
+    <ul>
+      <li>🚫 Keine Werbung</li>
+      <li>👥 Unbegrenzt viele Teilnehmer im Prüfermodus (frei: max. 5)</li>
+      <li>⬇️ Ergebnisliste als CSV exportieren</li>
+      <li>❤️ Unterstützt die Weiterentwicklung</li>
+    </ul>
+    <div id="premium-buy-area"></div>
+    <p class="muted" style="font-size:.76rem">Einmaliger Kauf über Google Play, kein Abo. Der Kauf wird lokal auf dem Gerät freigeschaltet.</p>
+  </div>
+</div>
+
+<!-- ===== Teilnehmer-Editor (Prüfermodus) ===== -->
+<div class="modal-back" id="modal-editor">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Teilnehmer bearbeiten">
+    <button class="iconbtn x" data-close="modal-editor" aria-label="Schließen">✕</button>
+    <h2 id="e-title">Teilnehmer hinzufügen</h2>
+    <label class="field" for="e-name">Name / Kennung</label>
+    <input type="text" id="e-name" placeholder="z. B. Mustermann, A." maxlength="60">
+    <div class="row2">
+      <div>
+        <label class="field">Wertungsgruppe</label>
+        <div class="seg" id="e-sex">
+          <button data-v="m" class="active">Männer</button>
+          <button data-v="w">Frauen</button>
+        </div>
+      </div>
+      <div>
+        <label class="field" for="e-age">Alter (optional)</label>
+        <input type="number" id="e-age" min="16" max="70" inputmode="numeric" placeholder="z. B. 24">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label class="field" for="e-sprint">Sprinttest (s)</label>
+        <input type="text" id="e-sprint" inputmode="decimal" placeholder="47,5">
+      </div>
+      <div>
+        <label class="field" for="e-hang">Klimmhang (s)</label>
+        <input type="text" id="e-hang" inputmode="decimal" placeholder="38">
+      </div>
+    </div>
+    <label class="field">Ausdauer</label>
+    <div class="seg" id="e-runtype">
+      <button data-v="lauf" class="active">1000-m-Lauf</button>
+      <button data-v="fet">FET 3000 m</button>
+    </div>
+    <div class="time-pair">
+      <input type="number" id="e-run-min" min="2" max="10" placeholder="min" inputmode="numeric"> :
+      <input type="number" id="e-run-sec" min="0" max="59" placeholder="sek" inputmode="numeric">
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="e-save">Speichern</button>
+      <button class="btn secondary" data-close="modal-editor">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   BFT Rechner – inoffizieller Punkterechner für den Basis-Fitness-Test
+   Alle Daten bleiben lokal (localStorage). Kein Server, kein Tracking.
+   ========================================================================= */
+
+/* ---------- Wertungssystem -------------------------------------------------
+   Anker laut offiziellem Informationsblatt „Sporttest Basis-Fitness-Test“:
+   - Sprinttest:  60,0 s = 100 P (Mindestanforderung), „sehr gut“ ab 41,99 s (= 400 P)
+   - Klimmhang:   5 s = 100 P, 45 s = 300 P („gut“), ab 65 s = 400 P („sehr gut“)
+   - 1000 m/FET:  6:30 min (390 s) = 100 P
+   Daraus abgeleitete lineare Punktformeln (öffentlich verbreitetes Schema):
+   - Sprint:   100 + (60 − Zeit) / 0,06   (≈ 16,7 P je Sekunde)
+   - Klimmhang:100 + (Zeit − 5) × 5
+   - Ausdauer: 100 + (390 − Zeit) / 0,6   („sehr gut“ = 400 P bei 3:30)
+   Frauen erhalten einen Leistungszuschlag von 15 % (Sprint, Ausdauer)
+   bzw. 40 % (Klimmhang) auf die erbrachte Leistung; die Mindestanforderungen
+   (60 s / 5 s / 390 s) gelten unverändert für alle.
+   Punkte je Disziplin werden bei 500 gedeckelt. Ohne Gewähr – maßgeblich ist
+   die offizielle Wertung der Bundeswehr. Alterszuschlag: noch nicht enthalten.
+--------------------------------------------------------------------------- */
+const BFT = {
+  MIN:  { sprint: 60.0, hang: 5, run: 390 },
+  CAP: 500,
+  sprintPoints(t, sex){
+    if (!(t > 0)) return null;
+    const eff = sex === "w" ? t * 0.85 : t;
+    return Math.max(0, Math.min(this.CAP, Math.round(100 + (60 - eff) / 0.06)));
+  },
+  hangPoints(t, sex){
+    if (!(t >= 0)) return null;
+    const eff = sex === "w" ? t * 1.40 : t;
+    return Math.max(0, Math.min(this.CAP, Math.round(100 + (eff - 5) * 5)));
+  },
+  runPoints(t, sex){
+    if (!(t > 0)) return null;
+    const eff = sex === "w" ? t * 0.85 : t;
+    return Math.max(0, Math.min(this.CAP, Math.round(100 + (390 - eff) / 0.6)));
+  },
+  evaluate({sprint, hang, run, sex}){
+    const p = {
+      sprint: this.sprintPoints(sprint, sex),
+      hang:   this.hangPoints(hang, sex),
+      run:    this.runPoints(run, sex)
+    };
+    const pass = {
+      sprint: sprint != null && sprint <= this.MIN.sprint,
+      hang:   hang   != null && hang   >= this.MIN.hang,
+      run:    run    != null && run    <= this.MIN.run
+    };
+    const complete = p.sprint != null && p.hang != null && p.run != null;
+    const allPass = complete && pass.sprint && pass.hang && pass.run;
+    const total = complete ? p.sprint + p.hang + p.run : null;
+    let grade = null, gradeClass = null;
+    if (complete){
+      if (!allPass){ grade = "nicht bestanden"; gradeClass = "g-fail"; }
+      else if (total >= 1200){ grade = "sehr gut"; gradeClass = "g-sehrgut"; }
+      else if (total >= 900){ grade = "gut"; gradeClass = "g-gut"; }
+      else if (total >= 600){ grade = "befriedigend"; gradeClass = "g-befr"; }
+      else { grade = "ausreichend"; gradeClass = "g-ausr"; }
+    }
+    return { points: p, pass, complete, allPass, total, grade, gradeClass };
+  }
+};
+
+/* ---------- Hilfsfunktionen ---------- */
+const $ = id => document.getElementById(id);
+const APP_VERSION = "1.0.0";
+function parseNum(v){
+  if (v == null) return null;
+  const n = parseFloat(String(v).trim().replace(",", "."));
+  return Number.isFinite(n) ? n : null;
+}
+function fmtTime(sec){
+  if (sec == null) return "–";
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return m + ":" + String(s).padStart(2, "0");
+}
+function fmtSec(v){ return v == null ? "–" : String(v).replace(".", ",") + " s"; }
+function esc(s){ const d = document.createElement("div"); d.textContent = s ?? ""; return d.innerHTML; }
+function store(key, val){
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ /* Speicher voll/geblockt */ }
+}
+function load(key, fallback){
+  try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); }
+  catch(e){ return fallback; }
+}
+
+/* ---------- Edition (zentraler free/premium-Schalter) ---------- */
+const Edition = {
+  KEY: "bft_edition",
+  FREE_LIMIT: 5,
+  get(){ return load(this.KEY, "free") === "premium" ? "premium" : "free"; },
+  isPremium(){ return this.get() === "premium"; },
+  set(v){ store(this.KEY, v === "premium" ? "premium" : "free"); this.apply(); },
+  apply(){
+    document.body.classList.toggle("edition-free", !this.isPremium());
+    document.body.classList.toggle("edition-premium", this.isPremium());
+    renderSettings(); renderPruefer();
+  }
+};
+
+/* ---------- Native Brücke (Capacitor) mit Feature-Detection ----------
+   Im Browser: a.download bzw. window.print().
+   In der späteren Android-App (Capacitor): Filesystem+Share bzw. Printer-Plugin.
+   Die nativen Zweige werden in der Capacitor-Phase angebunden.            */
+const Bridge = {
+  isNative(){
+    try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+    catch(e){ return false; }
+  },
+  async saveTextFile(filename, text, mime){
+    if (this.isNative() && window.BftNative && window.BftNative.saveTextFile){
+      try { await window.BftNative.saveTextFile(filename, text, mime); return; } catch(e){ /* Fallback unten */ }
+    }
+    const blob = new Blob([text], { type: mime + ";charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  },
+  async print(){
+    if (this.isNative() && window.BftNative && window.BftNative.print){
+      try { await window.BftNative.print(); return; } catch(e){ /* Fallback unten */ }
+    }
+    window.print();
+  }
+};
+
+/* ---------- Navigation ---------- */
+function show(view){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $("view-" + view).classList.add("active");
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", () => show(b.dataset.nav)));
+$("go-teilnehmer").addEventListener("click", () => show("teilnehmer"));
+$("go-pruefer").addEventListener("click", () => show("pruefer"));
+
+/* ---------- Modals ---------- */
+function openModal(id){ $(id).classList.add("open"); }
+function closeModal(id){ $(id).classList.remove("open"); }
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
+document.querySelectorAll(".modal-back").forEach(m => m.addEventListener("click", e => {
+  if (e.target === m && m.id !== "modal-onboarding") m.classList.remove("open");
+}));
+
+/* ---------- Segment-Buttons (generisch) ---------- */
+function segValue(id){ return $(id).querySelector("button.active").dataset.v; }
+function segInit(id, onChange){
+  $(id).querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    $(id).querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    if (onChange) onChange(b.dataset.v);
+  }));
+}
+
+/* ---------- Theme ---------- */
+const THEME_KEY = "bft_theme";
+function applyTheme(){
+  const t = load(THEME_KEY, "auto");
+  document.documentElement.dataset.theme = t;
+  $("s-theme").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === t));
+}
+segInit("s-theme", v => { store(THEME_KEY, v); applyTheme(); });
+
+/* ---------- Teilnehmer-Modus ---------- */
+const HIST_KEY = "bft_history";
+let tCurrent = null;
+
+function tRead(){
+  const runMin = parseNum($("t-run-min").value), runSec = parseNum($("t-run-sec").value);
+  return {
+    sex: segValue("t-sex"),
+    age: parseNum($("t-age").value),
+    sprint: parseNum($("t-sprint").value),
+    hang: parseNum($("t-hang").value),
+    runType: segValue("t-runtype"),
+    run: (runMin != null || runSec != null) ? (runMin ?? 0) * 60 + (runSec ?? 0) : null
+  };
+}
+function barWidth(p){ return p == null ? 0 : Math.min(100, p / BFT.CAP * 100); }
+
+function tRender(){
+  const inp = tRead();
+  const r = BFT.evaluate(inp);
+  tCurrent = { inp, r };
+  $("t-r-run-name").textContent = inp.runType === "fet" ? "FET 3000 m" : "1000-m-Lauf";
+  const rows = [
+    ["sprint", inp.sprint != null ? fmtSec(inp.sprint) + (r.pass.sprint ? "" : " · über 60,0 s!") : "–"],
+    ["hang",   inp.hang   != null ? fmtSec(inp.hang)   + (r.pass.hang   ? "" : " · unter 5 s!") : "–"],
+    ["run",    inp.run    != null ? fmtTime(inp.run) + " min" + (r.pass.run ? "" : " · über 6:30!") : "–"]
+  ];
+  for (const [k, sub] of rows){
+    const p = r.points[k];
+    $("t-r-" + k + "-sub").textContent = sub;
+    $("t-r-" + k + "-pts").textContent = p == null ? "–" : p + " P";
+    $("t-r-" + k + "-bar").style.width = barWidth(p) + "%";
+    $("t-r-" + k + "-bar").style.background = p != null && (p < 100 || !r.pass[k]) ? "var(--bad)" : "var(--accent2)";
+  }
+  $("t-r-total").textContent = r.total == null ? "–" : r.total;
+  const g = $("t-r-grade");
+  if (r.grade){ g.style.visibility = "visible"; g.textContent = r.grade; g.className = "grade " + r.gradeClass; }
+  else g.style.visibility = "hidden";
+  const fails = [];
+  if (r.complete && !r.allPass){
+    if (!r.pass.sprint) fails.push("Sprinttest über 60,0 s");
+    if (!r.pass.hang) fails.push("Klimmhang unter 5 s");
+    if (!r.pass.run) fails.push("Ausdauer über 6:30 min");
+  }
+  $("t-r-failhint").style.display = fails.length ? "block" : "none";
+  $("t-r-failhint").textContent = fails.length ? "Mindestanforderung verfehlt: " + fails.join(", ") + " – Test damit insgesamt nicht bestanden." : "";
+  $("t-save").disabled = !r.complete;
+}
+["t-age","t-sprint","t-hang","t-run-min","t-run-sec"].forEach(id => $(id).addEventListener("input", tRender));
+segInit("t-sex", tRender);
+segInit("t-runtype", tRender);
+
+$("t-save").addEventListener("click", () => {
+  if (!tCurrent || !tCurrent.r.complete) return;
+  const h = load(HIST_KEY, []);
+  h.unshift({ date: Date.now(), inp: tCurrent.inp, total: tCurrent.r.total, grade: tCurrent.r.grade });
+  store(HIST_KEY, h.slice(0, 200));
+  renderHistory();
+});
+
+function renderHistory(){
+  const h = load(HIST_KEY, []);
+  const el = $("t-history");
+  if (!h.length){ el.innerHTML = '<div class="empty">Noch keine gespeicherten Ergebnisse. Nach der Eingabe auf „Im Verlauf speichern“ tippen.</div>'; return; }
+  const best = Math.max(...h.map(x => x.total));
+  let html = '<p class="muted">Bestleistung: <b>' + best + ' Punkte</b> · ' + h.length + ' Einträge</p>';
+  html += '<div class="tablewrap"><table><thead><tr><th>Datum</th><th>Sprint</th><th>Klimm.</th><th>Ausd.</th><th style="text-align:right">Punkte</th><th>Note</th><th></th></tr></thead><tbody>';
+  h.forEach((x, i) => {
+    const d = new Date(x.date);
+    html += "<tr><td>" + d.toLocaleDateString("de-DE", {day:"2-digit",month:"2-digit",year:"2-digit"}) + "</td>"
+      + "<td>" + fmtSec(x.inp.sprint) + "</td><td>" + fmtSec(x.inp.hang) + "</td><td>" + fmtTime(x.inp.run) + "</td>"
+      + '<td class="num"><b>' + x.total + "</b></td><td>" + esc(x.grade) + "</td>"
+      + '<td><button class="btn danger small" data-hdel="' + i + '">✕</button></td></tr>';
+  });
+  html += "</tbody></table></div>";
+  el.innerHTML = html;
+  el.querySelectorAll("[data-hdel]").forEach(b => b.addEventListener("click", () => {
+    const h2 = load(HIST_KEY, []); h2.splice(parseInt(b.dataset.hdel, 10), 1); store(HIST_KEY, h2); renderHistory();
+  }));
+}
+
+/* ---------- Prüfermodus ---------- */
+const PART_KEY = "bft_participants";
+let editIndex = null;
+
+$("ptab-erfassen-btn").addEventListener("click", () => pTab("erfassen"));
+$("ptab-aufbau-btn").addEventListener("click", () => pTab("aufbau"));
+function pTab(which){
+  $("pruefer-tab-erfassen").style.display = which === "erfassen" ? "" : "none";
+  $("pruefer-tab-aufbau").style.display = which === "aufbau" ? "" : "none";
+  $("ptab-erfassen-btn").classList.toggle("active", which === "erfassen");
+  $("ptab-aufbau-btn").classList.toggle("active", which === "aufbau");
+}
+
+function participants(){ return load(PART_KEY, []); }
+
+function renderPruefer(){
+  const list = participants();
+  const tb = $("p-tbody");
+  $("p-empty").style.display = list.length ? "none" : "block";
+  $("p-export-star").style.display = Edition.isPremium() ? "none" : "";
+  $("p-limit-info").textContent = Edition.isPremium()
+    ? "Premium: unbegrenzt viele Teilnehmer."
+    : "Freie Version: bis zu " + Edition.FREE_LIMIT + " Teilnehmer (" + list.length + "/" + Edition.FREE_LIMIT + " belegt). Premium hebt das Limit auf.";
+  let html = "";
+  list.forEach((p, i) => {
+    const r = BFT.evaluate(p);
+    const status = !r.complete ? '<span class="pill-status" style="background:var(--text2)">unvollständig</span>'
+      : '<span class="pill-status ' + (r.allPass ? "" : "") + '" style="background:var(--' + (r.allPass ? "ok" : "bad") + ')">' + (r.allPass ? "bestanden" : "nicht best.") + "</span>";
+    html += "<tr><td><b>" + esc(p.name || "–") + "</b><br><span class='muted'>" + status + "</span></td>"
+      + "<td>" + (p.sex === "w" ? "F" : "M") + (p.age ? " · " + p.age : "") + "</td>"
+      + "<td>" + fmtSec(p.sprint) + "</td><td>" + fmtSec(p.hang) + "</td>"
+      + "<td>" + fmtTime(p.run) + (p.runType === "fet" ? " (FET)" : "") + "</td>"
+      + '<td class="num"><b>' + (r.total ?? "–") + "</b></td>"
+      + "<td>" + (r.grade ? esc(r.grade) : "–") + "</td>"
+      + '<td><button class="btn secondary small" data-pedit="' + i + '">✎</button> '
+      + '<button class="btn danger small" data-pdel="' + i + '">✕</button></td></tr>';
+  });
+  tb.innerHTML = html;
+  tb.querySelectorAll("[data-pedit]").forEach(b => b.addEventListener("click", () => openEditor(parseInt(b.dataset.pedit, 10))));
+  tb.querySelectorAll("[data-pdel]").forEach(b => b.addEventListener("click", () => {
+    const l = participants(); const name = l[parseInt(b.dataset.pdel,10)]?.name || "Eintrag";
+    if (confirm("„" + name + "“ wirklich löschen?")){ l.splice(parseInt(b.dataset.pdel, 10), 1); store(PART_KEY, l); renderPruefer(); }
+  }));
+}
+
+$("p-add").addEventListener("click", () => {
+  if (!Edition.isPremium() && participants().length >= Edition.FREE_LIMIT){ openPremium(); return; }
+  openEditor(null);
+});
+$("p-clear").addEventListener("click", () => {
+  if (participants().length && confirm("Wirklich die gesamte Teilnehmerliste löschen?")){ store(PART_KEY, []); renderPruefer(); }
+});
+
+function openEditor(index){
+  editIndex = index;
+  const p = index != null ? participants()[index] : null;
+  $("e-title").textContent = p ? "Teilnehmer bearbeiten" : "Teilnehmer hinzufügen";
+  $("e-name").value = p?.name || "";
+  $("e-age").value = p?.age ?? "";
+  $("e-sprint").value = p?.sprint != null ? String(p.sprint).replace(".", ",") : "";
+  $("e-hang").value = p?.hang != null ? String(p.hang).replace(".", ",") : "";
+  $("e-run-min").value = p?.run != null ? Math.floor(p.run / 60) : "";
+  $("e-run-sec").value = p?.run != null ? Math.round(p.run % 60) : "";
+  ["e-sex", "e-runtype"].forEach(id => {
+    const val = id === "e-sex" ? (p?.sex || "m") : (p?.runType || "lauf");
+    $(id).querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === val));
+  });
+  openModal("modal-editor");
+  $("e-name").focus();
+}
+segInit("e-sex"); segInit("e-runtype");
+
+$("e-save").addEventListener("click", () => {
+  const runMin = parseNum($("e-run-min").value), runSec = parseNum($("e-run-sec").value);
+  const p = {
+    name: $("e-name").value.trim() || "Teilnehmer " + (participants().length + 1),
+    sex: segValue("e-sex"),
+    age: parseNum($("e-age").value),
+    sprint: parseNum($("e-sprint").value),
+    hang: parseNum($("e-hang").value),
+    runType: segValue("e-runtype"),
+    run: (runMin != null || runSec != null) ? (runMin ?? 0) * 60 + (runSec ?? 0) : null
+  };
+  const l = participants();
+  if (editIndex != null) l[editIndex] = p; else l.push(p);
+  store(PART_KEY, l);
+  closeModal("modal-editor");
+  renderPruefer();
+});
+
+/* CSV-Export (Premium) – deutsches Format: Semikolon, BOM für Excel */
+$("p-export").addEventListener("click", async () => {
+  if (!Edition.isPremium()){ openPremium(); return; }
+  const list = participants();
+  if (!list.length){ alert("Die Teilnehmerliste ist leer."); return; }
+  let csv = "﻿Name;Wertung;Alter;Sprinttest (s);Klimmhang (s);Ausdauer;Ausdauerzeit;Punkte Sprint;Punkte Klimmhang;Punkte Ausdauer;Gesamtpunkte;Note;Status\r\n";
+  list.forEach(p => {
+    const r = BFT.evaluate(p);
+    csv += [
+      '"' + (p.name || "").replace(/"/g, '""') + '"',
+      p.sex === "w" ? "F" : "M", p.age ?? "",
+      p.sprint != null ? String(p.sprint).replace(".", ",") : "",
+      p.hang != null ? String(p.hang).replace(".", ",") : "",
+      p.runType === "fet" ? "FET 3000 m" : "1000-m-Lauf",
+      p.run != null ? fmtTime(p.run) : "",
+      r.points.sprint ?? "", r.points.hang ?? "", r.points.run ?? "",
+      r.total ?? "", r.grade ?? "",
+      !r.complete ? "unvollständig" : (r.allPass ? "bestanden" : "nicht bestanden")
+    ].join(";") + "\r\n";
+  });
+  const d = new Date();
+  const stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  await Bridge.saveTextFile("bft-ergebnisliste-" + stamp + ".csv", csv, "text/csv");
+});
+
+$("p-print").addEventListener("click", () => {
+  $("view-pruefer").classList.add("print-me");
+  Bridge.print();
+  setTimeout(() => $("view-pruefer").classList.remove("print-me"), 1000);
+});
+
+/* ---------- Premium ---------- */
+function openPremium(){
+  const area = $("premium-buy-area");
+  if (Edition.isPremium()){
+    area.innerHTML = '<p><b>★ Premium ist aktiv – danke für deine Unterstützung!</b></p>';
+  } else if (Bridge.isNative()){
+    /* In der Android-App: Kauf über Google Play Billing (wird in der App-Phase angebunden) */
+    area.innerHTML = '<div class="btn-row"><button class="btn" id="premium-buy">Für 2,99 € freischalten</button></div>';
+    area.querySelector("#premium-buy").addEventListener("click", () => {
+      if (window.BftNative && window.BftNative.buyPremium) window.BftNative.buyPremium();
+      else alert("Der Kauf ist in dieser Version noch nicht verfügbar.");
+    });
+  } else {
+    area.innerHTML = '<div class="notice">Der Kauf ist in der Android-App über Google Play möglich. '
+      + 'Diese Web-Version ist eine Vorschau – hier kannst du Premium testweise aktivieren:</div>'
+      + '<div class="btn-row"><button class="btn secondary" id="premium-test">Premium testweise aktivieren</button></div>';
+    area.querySelector("#premium-test").addEventListener("click", () => { Edition.set("premium"); openPremium(); });
+  }
+  openModal("modal-premium");
+}
+$("ad-premium-link").addEventListener("click", e => { e.preventDefault(); openPremium(); });
+$("s-premium").addEventListener("click", () => { closeModal("modal-settings"); openPremium(); });
+
+/* ---------- Einstellungen ---------- */
+function renderSettings(){
+  $("s-version").textContent = "v" + APP_VERSION;
+  $("s-edition-status").innerHTML = Edition.isPremium()
+    ? "★ <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, CSV-Export."
+    : "Aktuell: <b>Freie Version</b> (mit Werbung, max. " + Edition.FREE_LIMIT + " Teilnehmer im Prüfermodus).";
+}
+$("btn-settings").addEventListener("click", () => { renderSettings(); openModal("modal-settings"); });
+$("foot-sources").addEventListener("click", e => { e.preventDefault(); renderSettings(); openModal("modal-settings"); });
+
+/* ---------- Onboarding ---------- */
+const OB_KEY = "bft_onboarding_done";
+let obStep = 0;
+function obShow(step){
+  obStep = Math.max(0, Math.min(2, step));
+  document.querySelectorAll(".ob-step").forEach(s => s.classList.toggle("active", parseInt(s.dataset.step, 10) === obStep));
+  document.querySelectorAll("#ob-dots i").forEach((d, i) => d.classList.toggle("on", i === obStep));
+  $("ob-next").textContent = obStep === 2 ? "Los geht's!" : "Weiter";
+}
+function obFinish(){ store(OB_KEY, true); closeModal("modal-onboarding"); }
+$("ob-next").addEventListener("click", () => { if (obStep === 2) obFinish(); else obShow(obStep + 1); });
+$("ob-skip").addEventListener("click", obFinish);
+$("s-onboarding").addEventListener("click", () => { closeModal("modal-settings"); obShow(0); openModal("modal-onboarding"); });
+
+/* ---------- Service Worker: nur auf GitHub Pages, nicht in der App ---------- */
+if ("serviceWorker" in navigator && location.hostname.endsWith("github.io")){
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+
+/* ---------- Start ---------- */
+applyTheme();
+Edition.apply();
+renderHistory();
+renderPruefer();
+tRender();
+if (!load(OB_KEY, false)){ obShow(0); openModal("modal-onboarding"); }
+</script>
+</body>
+</html>

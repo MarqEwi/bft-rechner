@@ -1,0 +1,10 @@
+{
+  "name": "bft-rechner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BFT Rechner – inoffizieller Punkterechner für den Basis-Fitness-Test (Web + spätere Capacitor-App)",
+  "scripts": {
+    "sync-www": "mkdir -p www && cp index.html datenschutz.html manifest.webmanifest sw.js www/ && cp -r icons www/",
+    "sync": "npm run sync-www"
+  }
+}
