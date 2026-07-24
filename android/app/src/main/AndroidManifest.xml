@@ -23,12 +23,10 @@
 
         </activity>
 
-        <!-- AdMob-App-ID. Aktuell: offizielle Google-TEST-ID.
-             Vor der Play-Store-Veröffentlichung durch die echte App-ID
-             aus dem AdMob-Konto ersetzen (ca-app-pub-XXXX~YYYY). -->
+        <!-- AdMob-App-ID. Echte AdMob-App-ID (MERCwerk). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-7311552668399418~5790188730" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -1000,7 +1000,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0.3";
+const APP_VERSION = "1.0.4";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
@@ -1048,8 +1048,8 @@ const Edition = {
    Banner-ID aus dem AdMob-Konto eintragen. Zusätzlich im AndroidManifest
    die echte App-ID (ca-app-pub-…~…) hinterlegen. */
 const ADS_CONF = {
-  TESTING: true,
-  BANNER_ID: "ca-app-pub-3940256099942544/6300978111" /* Googles Test-Banner */
+  TESTING: false,
+  BANNER_ID: "ca-app-pub-7311552668399418/3814048078" /* echtes Banner unten */
 };
 
 const Ads = {
