@@ -662,9 +662,7 @@
           Punktberechnung nach öffentlich zugänglichen Angaben, ohne Gewähr – maßgeblich ist stets die offizielle Wertung.
           Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht
           (bis 35 kein Zuschlag); über das Häkchen „ohne Alterszuschlag“ lässt er sich abschalten.</p>
-        <p class="muted" id="ads-status" style="font-size:.78rem">Werbestatus: –</p>
         <div class="btn-row"><button class="btn secondary small" id="ads-privacy-btn" style="display:none">Werbe-Einstellungen ändern</button></div>
-        <p class="muted" id="buy-status" style="font-size:.78rem">Kauf-Status: –</p>
         <p class="muted"><a href="datenschutz.html">Datenschutzerklärung &amp; Impressum</a></p>
       </div>
     </details>
@@ -1001,7 +999,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0.5";
+const APP_VERSION = "1.0.6";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
