@@ -664,6 +664,7 @@
           (bis 35 kein Zuschlag); über das Häkchen „ohne Alterszuschlag“ lässt er sich abschalten.</p>
         <p class="muted" id="ads-status" style="font-size:.78rem">Werbestatus: –</p>
         <div class="btn-row"><button class="btn secondary small" id="ads-privacy-btn" style="display:none">Werbe-Einstellungen ändern</button></div>
+        <p class="muted" id="buy-status" style="font-size:.78rem">Kauf-Status: –</p>
         <p class="muted"><a href="datenschutz.html">Datenschutzerklärung &amp; Impressum</a></p>
       </div>
     </details>
@@ -1000,7 +1001,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.0.5";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
@@ -1143,26 +1144,45 @@ const Ads = {
    dass der Kauf noch nicht verfügbar ist.                              */
 const Billing = {
   PRODUCT: "premium_unlock",
-  inited: false, product: null,
+  inited: false, product: null, statusLog: [],
+  log(msg){
+    console.log("[Billing] " + msg);
+    this.statusLog.push(msg);
+    if (this.statusLog.length > 8) this.statusLog.shift();
+    const el = document.getElementById("buy-status");
+    if (el) el.textContent = "Kauf-Status: " + this.statusLog.join(" → ");
+  },
   available(){
     try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.CdvPurchase && window.CdvPurchase.store); }
     catch(e){ return false; }
   },
   init(){
-    if (this.inited || !this.available()) return;
+    if (this.inited) return;
+    if (!this.available()){ this.log("nur Web / Plugin fehlt"); return; }
     this.inited = true;
     try {
       const { store, ProductType, Platform } = window.CdvPurchase;
+      this.log("Plugin bereit");
+      store.verbosity = store.DEBUG;
       store.register([{ id: this.PRODUCT, type: ProductType.NON_CONSUMABLE, platform: Platform.GOOGLE_PLAY }]);
+      store.error(err => this.log("Fehler " + (err && err.code) + ": " + (err && err.message)));
       store.when()
-        .productUpdated(() => { this.product = store.get(this.PRODUCT); this.refreshModal(); })
-        .approved(tr => { this.unlock(); try { tr.finish(); } catch(e){} })
+        .productUpdated(p => {
+          this.product = store.get(this.PRODUCT);
+          const offer = this.product && this.product.getOffer && this.product.getOffer();
+          this.log("Produkt geladen: " + (this.product ? "ja" : "nein")
+            + ", Preis " + (this.price() || "?")
+            + ", Angebot " + (offer ? "ja" : "nein")
+            + ", kann kaufen " + (this.product && this.product.canPurchase ? "ja" : "nein"));
+          this.refreshModal();
+        })
+        .approved(tr => { this.log("Kauf genehmigt"); this.unlock(); try { tr.finish(); } catch(e){} })
         .receiptUpdated(() => {
-          /* Früherer Kauf (z. B. nach Neuinstallation) wird automatisch erkannt */
           try { if (store.owned(this.PRODUCT) && !Edition.isPremium()) this.unlock(); } catch(e){}
         });
       store.initialize([Platform.GOOGLE_PLAY]);
-    } catch(e){}
+      this.log("Abfrage gestartet");
+    } catch(e){ this.log("Init-Fehler: " + (e && e.message ? e.message : e)); }
   },
   unlock(){
     if (!Edition.isPremium()){ Edition.set("premium"); this.refreshModal(); }
@@ -1175,9 +1195,11 @@ const Billing = {
     try {
       const offer = this.product && this.product.getOffer && this.product.getOffer();
       if (!offer){
+        this.log("Kaufversuch – kein Angebot vorhanden");
         alert("Der Kauf ist im Moment nicht verfügbar. Bitte prüfe deine Internetverbindung und versuche es später erneut.");
         return;
       }
+      this.log("Kaufdialog wird geöffnet");
       offer.order().then(err => {
         if (err && err.isError) alert("Der Kauf wurde abgebrochen oder ist fehlgeschlagen.");
       });
@@ -1950,6 +1972,8 @@ function renderSettings(){
   $("s-version").textContent = "v" + APP_VERSION;
   const adsEl = $("ads-status");
   if (adsEl && Ads.statusLog.length) adsEl.textContent = "Werbestatus: " + Ads.statusLog.join(" → ");
+  const buyEl = $("buy-status");
+  if (buyEl && Billing.statusLog.length) buyEl.textContent = "Kauf-Status: " + Billing.statusLog.join(" → ");
   $("s-edition-status").innerHTML = Edition.isPremium()
     ? "💎 <b>Premium</b> ist aktiv: keine Werbung, unbegrenzte Teilnehmer, Export (PDF/Bild/Text), Drucken, eigene Berechnungen."
     : "Aktuell: <b>Freie Version</b> (mit Werbung, max. " + Edition.FREE_LIMIT + " Teilnehmer im Prüfermodus).";
