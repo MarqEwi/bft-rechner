@@ -172,6 +172,10 @@
   details.station .inner{padding:4px 16px 12px}
   details.station ul{margin:.3rem 0 .6rem;padding-left:1.2rem}
   details.station li{margin:.22rem 0;font-size:.9rem}
+  .limits-table{width:100%;border-collapse:collapse;margin:8px 0 6px;font-size:.84rem}
+  .limits-table th,.limits-table td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line)}
+  .limits-table th{font-weight:600;color:var(--text2);font-size:.76rem}
+  .limits-table tr:last-child td{border-bottom:none}
   .station-img{display:block;width:100%;max-width:560px;border-radius:10px;border:1px solid var(--line);margin:10px 0 4px}
   details.subdetails{margin:10px 0 2px;border:1px solid var(--line);border-radius:9px;background:var(--bg3)}
   details.subdetails summary{cursor:pointer;padding:8px 12px;font-size:.85rem;font-weight:600;color:var(--text2);list-style:revert}
@@ -424,6 +428,10 @@
         <div class="spacer"></div>
         <span class="grade g-ausr" id="t-r-grade" style="visibility:hidden">–</span>
       </div>
+      <details class="subdetails" id="t-limits">
+        <summary>Bestehensgrenze &amp; Bestwerte</summary>
+        <div class="sd-body" id="t-limits-body"></div>
+      </details>
       <div id="t-r-failhint" class="hint-fail" style="display:none"></div>
       <div class="btn-row">
         <button class="btn" id="t-save" disabled><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg> Im Verlauf speichern</button>
@@ -1403,11 +1411,32 @@ function tRead(){
 }
 function barWidth(p){ return p == null ? 0 : Math.min(100, p / BFT.CAP * 100); }
 
+function renderLimits(inp){
+  const el = $("t-limits-body");
+  if (!el) return;
+  const C = Calc.active(), A = C.anchors, S = C.surch;
+  const runName = inp.runType === "fet" ? "Fahrradergometer 3000 m" : "1000-m-Lauf";
+  const pc = x => String(Math.round(x * 1000) / 10).replace(".", ",");
+  let h = '<p class="muted" style="margin:6px 0 2px;font-size:.84rem">Bestanden ist nur, wer in <b>jeder Disziplin mindestens 100 Punkte</b> (Mindestleistung) erreicht. '
+    + 'Note je Disziplin: 100 P = 4,49 &hellip; ab 449 P = 1,0; Gesamtnote = Durchschnitt der drei Noten '
+    + '(sehr gut bis 1,49 &middot; gut bis 2,49 &middot; zufriedenstellend bis 3,49 &middot; ausreichend bis 4,49).</p>';
+  h += '<table class="limits-table"><thead><tr><th></th><th>f&uuml;r 100 P (Mindestleistung)</th><th>f&uuml;r 400 P (Bestwert)</th></tr></thead><tbody>'
+    + '<tr><td><b>Sprinttest</b></td><td>' + fmtSec(A.sprint.p100) + '</td><td>' + fmtSec(A.sprint.p400) + '</td></tr>'
+    + '<tr><td><b>Klimmhang</b></td><td>' + fmtSec(A.hang.p100) + '</td><td>' + fmtSec(A.hang.p400) + '</td></tr>'
+    + '<tr><td><b>' + esc(runName) + '</b></td><td>' + fmtTime(A.run.p100) + ' min</td><td>' + fmtTime(A.run.p400) + ' min</td></tr>'
+    + '</tbody></table>';
+  h += '<p class="muted" style="margin:2px 0 4px;font-size:.78rem">Zuschl&auml;ge der aktiven Berechnung: Frauen +' + pc(S.gS) + ' % Sprint, +' + pc(S.gH) + ' % Klimmhang, +' + pc(S.gR) + ' % Ausdauer; '
+    + 'Alterszuschlag ab dem 36. Lebensjahr +' + pc(S.age) + ' % pro Lebensjahr. Die Mindestanforderungen gelten unver&auml;ndert f&uuml;r alle.'
+    + (Calc.isCustomActive() ? ' Werte der eigenen Berechnung &bdquo;' + esc(Calc.active().name) + '&ldquo;.' : '') + '</p>';
+  el.innerHTML = h;
+}
+
 function tRender(){
   const inp = tRead();
   const r = BFT.evaluate(inp);
   tCurrent = { inp, r };
   $("t-r-run-name").textContent = inp.runType === "fet" ? "Fahrradergometer 3000 m" : "1000-m-Lauf";
+  renderLimits(inp);
   const th = BFT.thresholds();
   const rows = [
     ["sprint", inp.sprint != null ? fmtSec(inp.sprint) + (r.pass.sprint ? (r.discNotes.sprint ? " · Note " + r.discNotes.sprint : "") : " · über " + fmtSec(th.sprint) + "!") : "–"],
