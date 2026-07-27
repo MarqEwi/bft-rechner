@@ -8,6 +8,7 @@ android/app/release/
 android/capacitor-cordova-android-plugins/build/
 
 # Signierung & Secrets – niemals ins Git!
+android/play-service-account.json
 keystore.properties
 *.keystore
 *.jks
