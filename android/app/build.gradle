@@ -75,3 +75,20 @@ try {
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
+
+// ---- Automatisches Veröffentlichen zu Google Play (Gradle Play Publisher) ----
+// Aktiv NUR, wenn android/play-service-account.json existiert (liegt nicht im Git).
+// Nutzung im Terminal (Ordner android/):
+//   gradlew publishBundle                       -> baut + lädt in den internen Test
+//   gradlew publishBundle -PplayTrack=production -> baut + lädt in die Produktion
+// Der versionCode wird dabei automatisch auf (höchster Play-Wert + 1) gesetzt.
+def playCredsFile = rootProject.file("play-service-account.json")
+if (playCredsFile.exists()) {
+    apply plugin: "com.github.triplet.play"
+    play {
+        serviceAccountCredentials.set(playCredsFile)
+        defaultToAppBundles.set(true)
+        track.set(project.hasProperty("playTrack") ? project.property("playTrack").toString() : "internal")
+        resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO)
+    }
+}
