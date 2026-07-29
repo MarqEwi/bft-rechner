@@ -458,7 +458,7 @@
       <div class="btn-row">
         <button class="btn" id="p-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Teilnehmer hinzufügen</button>
         <button class="btn secondary" id="p-export"><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> Export <span class="premium-star" id="p-export-star">💎</span></button>
-        <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> Drucken <span class="premium-star" id="p-print-star">💎</span></button>
+        <button class="btn secondary" id="p-print"><svg class="ic" aria-hidden="true"><use href="#i-print"/></svg> <span id="p-print-label">Drucken</span> <span class="premium-star" id="p-print-star">💎</span></button>
         <button class="btn danger small" id="p-clear" style="margin-left:auto">Liste leeren</button>
       </div>
       <p class="muted on-bg" id="p-limit-info"></p>
@@ -681,6 +681,9 @@
           Alterszuschlag: ab dem vollendeten 36. Lebensjahr werden die erreichten Punkte um 0,5 % pro Lebensjahr erhöht
           (bis 35 kein Zuschlag); über das Häkchen „ohne Alterszuschlag“ lässt er sich abschalten.</p>
         <div class="btn-row"><button class="btn secondary small" id="ads-privacy-btn" style="display:none">Werbe-Einstellungen ändern</button></div>
+        <p class="muted" id="ads-status" style="display:none;font-size:.78rem">Werbestatus: –</p>
+        <p class="muted" id="buy-status" style="display:none;font-size:.78rem">Kauf-Status: –</p>
+        <p class="muted" id="export-status" style="display:none;font-size:.78rem">Export-Status: –</p>
         <p class="muted"><a href="datenschutz.html">Datenschutzerklärung &amp; Impressum</a></p>
       </div>
     </details>
@@ -1017,7 +1020,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0.6";
+const APP_VERSION = "1.0.7";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
@@ -1244,28 +1247,59 @@ const Bridge = {
   async saveTextFile(filename, text, mime){
     await this.saveBlob(filename, new Blob([text], { type: mime + ";charset=utf-8" }));
   },
+  statusLog: [],
+  log(msg){
+    console.log("[Export] " + msg);
+    this.statusLog.push(msg);
+    if (this.statusLog.length > 6) this.statusLog.shift();
+    const el = document.getElementById("export-status");
+    if (el) el.textContent = "Export-Status: " + this.statusLog.join(" → ");
+  },
+  plugin(name){
+    try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null; }
+    catch(e){ return null; }
+  },
   async saveBlob(filename, blob){
-    /* In der App (Capacitor): über Filesystem + Share speichern/teilen. */
-    if (this.isNative() && window.BftNative && window.BftNative.saveBase64){
-      try {
-        const b64 = await new Promise((res, rej) => {
-          const fr = new FileReader();
-          fr.onload = () => res(String(fr.result).split(",")[1] || "");
-          fr.onerror = rej; fr.readAsDataURL(blob);
-        });
-        await window.BftNative.saveBase64(filename, b64, blob.type); return;
-      } catch(e){ /* Fallback unten */ }
-    }
+    /* In der App: Datei in den Cache schreiben und über das Teilen-Menü ausgeben
+       (a.download wird von der Android-WebView ignoriert). */
+    if (this.isNative()){ await this.shareBlob(filename, blob); return; }
+    /* Im Browser: normaler Download. */
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   },
-  async print(){
-    if (this.isNative() && window.BftNative && window.BftNative.print){
-      try { await window.BftNative.print(); return; } catch(e){ /* Fallback unten */ }
+  async shareBlob(filename, blob){
+    const FS = this.plugin("Filesystem"), SH = this.plugin("Share");
+    if (!FS || !SH){
+      this.log("Filesystem/Share-Plugin nicht gefunden");
+      alert("Speichern/Teilen ist in dieser Version leider nicht verfügbar.");
+      return;
     }
+    try {
+      const b64 = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result).split(",")[1] || "");
+        fr.onerror = rej; fr.readAsDataURL(blob);
+      });
+      this.log("schreibe " + filename);
+      /* Kein Bundler: das Directory-Enum existiert nicht, der String "CACHE" wird direkt übergeben */
+      await FS.writeFile({ path: "export/" + filename, data: b64, directory: "CACHE", recursive: true });
+      const u = await FS.getUri({ path: "export/" + filename, directory: "CACHE" });
+      this.log("Teilen-Menü öffnet");
+      await SH.share({ title: filename, files: [u.uri] });
+      this.log("geteilt");
+    } catch(e){
+      const msg = e && e.message ? e.message : String(e);
+      /* Abbruch des Teilen-Menüs ist kein Fehler */
+      if (/cancel/i.test(msg)){ this.log("Teilen abgebrochen"); return; }
+      this.log("Fehler: " + msg);
+      alert("Speichern/Teilen fehlgeschlagen: " + msg);
+    }
+  },
+  async print(){
+    /* Nur im Browser sinnvoll – in der App übernimmt der Teilen-Weg (siehe Drucken-Knopf) */
     window.print();
   }
 };
@@ -1779,15 +1813,20 @@ function buildPdf(lines){
   return pdf;
 }
 function strToBlob(s, mime){ const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 0xff; return new Blob([b], { type: mime }); }
-function exportPdf(){
+function buildPdfBlob(){
   const { head, rows } = exportRows();
-  if (!rows.length){ alert("Die Teilnehmerliste ist leer."); return; }
+  if (!rows.length) return null;
   const w = colWidths(head, rows);
   const fmt = cells => cells.map((c,i) => c.padEnd(w[i])).join("  ");
   const lines = ["BFT Tool - Ergebnisliste (Basis-Fitness-Test)", "Erstellt: " + dateStr(), "Berechnung: " + Calc.label(), "", fmt(head), w.map(x => "-".repeat(x)).join("  ")];
   rows.forEach(r => lines.push(fmt(r)));
   lines.push(""); lines.push("Erstellt mit dem BFT Tool – Basis Fitness Test");
-  Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".pdf", strToBlob(buildPdf(lines), "application/pdf"));
+  return strToBlob(buildPdf(lines), "application/pdf");
+}
+function exportPdf(){
+  const blob = buildPdfBlob();
+  if (!blob){ alert("Die Teilnehmerliste ist leer."); return; }
+  Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".pdf", blob);
   closeModal("modal-export");
 }
 
@@ -1802,6 +1841,14 @@ $("exp-txt").addEventListener("click", exportText);
 
 $("p-print").addEventListener("click", () => {
   if (!Edition.isPremium()){ openPremium(); return; }
+  if (Bridge.isNative()){
+    /* In der App gibt es keinen Druckdialog: Ergebnisliste als PDF teilen
+       (von dort aus ist auch Drucken über den Android-Druckdienst möglich) */
+    const blob = buildPdfBlob();
+    if (!blob){ alert("Die Teilnehmerliste ist leer."); return; }
+    Bridge.saveBlob("bft-ergebnisliste-" + dateStamp() + ".pdf", blob);
+    return;
+  }
   $("view-pruefer").classList.add("print-me");
   Bridge.print();
   setTimeout(() => $("view-pruefer").classList.remove("print-me"), 1000);
@@ -2033,6 +2080,20 @@ $("ob-next").addEventListener("click", () => { if (obStep === 2) obFinish(); els
 $("ob-skip").addEventListener("click", obFinish);
 $("s-onboarding").addEventListener("click", () => { closeModal("modal-settings"); obShow(0); openModal("modal-onboarding"); });
 $("ads-privacy-btn").addEventListener("click", () => Ads.openPrivacyOptions());
+/* 5× Tippen auf die Versionsnummer blendet die Diagnosezeilen ein */
+let verTaps = 0, verTapTimer = null;
+$("s-version").addEventListener("click", () => {
+  verTaps++;
+  clearTimeout(verTapTimer);
+  verTapTimer = setTimeout(() => { verTaps = 0; }, 2500);
+  if (verTaps >= 5){
+    verTaps = 0;
+    [["ads-status", "Werbestatus", Ads.statusLog], ["buy-status", "Kauf-Status", Billing.statusLog], ["export-status", "Export-Status", Bridge.statusLog]].forEach(([id, label, log]) => {
+      const el = $(id);
+      if (el){ el.style.display = ""; if (log.length) el.textContent = label + ": " + log.join(" → "); }
+    });
+  }
+});
 
 /* ---------- Service Worker: nur auf GitHub Pages, nicht in der App ---------- */
 if ("serviceWorker" in navigator && location.hostname.endsWith("github.io")){
@@ -2078,6 +2139,7 @@ applyTheme();
 Edition.apply();
 Ads.sync();
 if (Bridge.isNative()){
+  $("p-print-label").textContent = "Drucken / Teilen";
   document.addEventListener("deviceready", () => Billing.init(), { once: true });
   /* Fallback, falls deviceready bereits gefeuert hat: */
   setTimeout(() => Billing.init(), 3000);
