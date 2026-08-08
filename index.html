@@ -1026,7 +1026,7 @@ const BFT = {
 
 /* ---------- Hilfsfunktionen ---------- */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.1.1";
+const APP_VERSION = "1.1.2";
 function parseNum(v){
   if (v == null) return null;
   const n = parseFloat(String(v).trim().replace(",", "."));
@@ -1079,7 +1079,7 @@ const ADS_CONF = {
 };
 
 const Ads = {
-  plugin: null, showing: false, statusLog: [], consentOk: false, privacyRequired: false,
+  plugin: null, showing: false, statusLog: [], consentOk: false, privacyRequired: false, kbHidden: false,
   log(msg, isErr){
     (isErr ? console.error : console.log)("[Ads] " + msg);
     this.statusLog.push(msg);
@@ -1100,6 +1100,7 @@ const Ads = {
       await p.initialize({ initializeForTesting: ADS_CONF.TESTING });
       this.log("AdMob initialisiert");
       p.addListener("bannerAdSizeChanged", info => {
+        if (Ads.kbHidden) return; /* absichtlich versteckt (Tastatur) – Layout unverändert lassen */
         Ads.log("Banner-Größe " + JSON.stringify(info));
         const h = info && info.height ? Math.max(0, Math.round(info.height)) : 0;
         document.documentElement.style.setProperty("--native-ad-h", h + "px");
@@ -1139,6 +1140,19 @@ const Ads = {
       this.consentOk = true;
       return true;
     }
+  },
+  async hideForKeyboard(){
+    /* Bei geöffneter Tastatur schrumpft das App-Fenster; das native Banner
+       würde sonst mitten in den Inhalt rutschen. Reservierter Platz bleibt
+       erhalten, damit beim Ein- und Ausblenden nichts springt. */
+    if (!this.showing || this.kbHidden || !this.plugin) return;
+    this.kbHidden = true;
+    try { await this.plugin.hideBanner(); } catch(e){ this.kbHidden = false; }
+  },
+  async showAfterKeyboard(){
+    if (!this.kbHidden || !this.plugin) return;
+    try { await this.plugin.resumeBanner(); } catch(e){}
+    this.kbHidden = false;
   },
   async openPrivacyOptions(){
     try { if (this.plugin) await this.plugin.showPrivacyOptionsForm(); } catch(e){}
@@ -2223,6 +2237,22 @@ Edition.apply();
 Ads.sync();
 if (Bridge.isNative()){
   $("p-print-label").textContent = "Drucken / Teilen";
+  /* Werbebanner ausblenden, solange die Tastatur offen ist */
+  const isTextInput = el => !!el && /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName) && el.type !== "checkbox" && el.type !== "radio";
+  let kbTimer = null;
+  document.addEventListener("focusin", e => {
+    if (!isTextInput(e.target)) return;
+    clearTimeout(kbTimer);
+    Ads.hideForKeyboard();
+  });
+  document.addEventListener("focusout", e => {
+    if (!isTextInput(e.target)) return;
+    clearTimeout(kbTimer);
+    /* kurz warten: beim Wechsel zwischen Feldern bleibt die Tastatur offen */
+    kbTimer = setTimeout(() => {
+      if (!isTextInput(document.activeElement)) Ads.showAfterKeyboard();
+    }, 350);
+  });
   try {
     const AppPlugin = Bridge.plugin("App");
     if (AppPlugin && AppPlugin.addListener) AppPlugin.addListener("backButton", onBackButton);
