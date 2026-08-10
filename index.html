@@ -178,7 +178,10 @@
     opacity:0;pointer-events:none;transition:opacity .18s}
   #toast.show{opacity:1}
   .limits-table{width:100%;border-collapse:collapse;margin:8px 0 6px;font-size:.84rem}
-  .limits-table th,.limits-table td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line)}
+  .limits-table th,.limits-table td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
+  /* Überschriften und Zeilen dürfen umbrechen – sonst wird die Tabelle auf schmalen
+     Handys breiter als der Bildschirm und die ganze Seite lässt sich seitlich schieben. */
+  .limits-table th,.limits-table td{white-space:normal}
   .limits-table th{font-weight:600;color:var(--text2);font-size:.76rem}
   .limits-table tr:last-child td{border-bottom:none}
   .station-img{display:block;width:100%;max-width:560px;border-radius:10px;border:1px solid var(--line);margin:10px 0 4px}
@@ -1551,7 +1554,8 @@ function renderLimits(inp){
   let h = '<p class="muted" style="margin:6px 0 2px;font-size:.84rem">Bestanden ist nur, wer in <b>jeder Disziplin mindestens 100 Punkte</b> (Mindestleistung) erreicht. '
     + 'Note je Disziplin: 100 P = 4,49 &hellip; ab 449 P = 1,0; Gesamtnote = Durchschnitt der drei Noten '
     + '(sehr gut bis 1,49 &middot; gut bis 2,49 &middot; zufriedenstellend bis 3,49 &middot; ausreichend bis 4,49).</p>';
-  h += '<table class="limits-table"><thead><tr><th></th><th>f&uuml;r 100 P (Mindestleistung)</th><th>f&uuml;r 400 P (Bestwert)</th></tr></thead><tbody>'
+  // &shy; = weiches Trennzeichen: die langen Wörter dürfen auf schmalen Handys umbrechen.
+  h += '<table class="limits-table"><thead><tr><th></th><th>f&uuml;r 100 P (Mindest&shy;leistung)</th><th>f&uuml;r 400 P (Best&shy;wert)</th></tr></thead><tbody>'
     + '<tr><td><b>Sprinttest</b></td><td>' + fmtSec(A.sprint.p100) + '</td><td>' + fmtSec(A.sprint.p400) + '</td></tr>'
     + '<tr><td><b>Klimmhang</b></td><td>' + fmtSec(A.hang.p100) + '</td><td>' + fmtSec(A.hang.p400) + '</td></tr>'
     + '<tr><td><b>' + esc(runName) + '</b></td><td>' + fmtTime(A.run.p100) + ' min</td><td>' + fmtTime(A.run.p400) + ' min</td></tr>'
