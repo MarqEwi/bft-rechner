@@ -151,12 +151,21 @@ ist hier ohne Wirkung, weil sie nie an eine einfarbige Fläche stoßen.
 
 **Android-Theme** (`android/app/src/main/res/values/styles.xml`):
 `AppTheme` verweist auf `@color/colorPrimary`, `colorPrimaryDark` und
-`colorAccent`. Diese Farben sind im Projekt **nicht** definiert, es greifen
-die Vorgaben aus der Capacitor-Bibliothek: Indigo `#3F51B5` / `#303F9F` und
-Pink `#FF4081`. Sichtbar wird das höchstens an System-Bedienelementen
-(z. B. Griffe bei der Textauswahl), weil die WebView den Bildschirm füllt.
-Wer es angleichen will, legt `android/app/src/main/res/values/colors.xml`
-mit den Markenwerten an.
+`colorAccent`. Diese Farben stehen in
+`android/app/src/main/res/values/colors.xml`:
+
+| Name | Wert | entspricht |
+|---|---|---|
+| `colorPrimary` | `#4A5D3A` | `--accent` hell |
+| `colorPrimaryDark` | `#3F4A33` | Flecktarn-Grundton hell |
+| `colorAccent` | `#6D8250` | `--accent2` hell |
+
+Die Datei muss bleiben: Fehlt sie, greifen die Vorgaben aus der
+Capacitor-Bibliothek – Indigo `#3F51B5` / `#303F9F` und Pink `#FF4081`.
+Sichtbar wird das an System-Bedienelementen (z. B. den Griffen bei der
+Textauswahl), weil die WebView sonst den Bildschirm füllt. App-Ressourcen
+haben Vorrang vor Bibliotheks-Ressourcen, deshalb genügt das Anlegen der
+Datei.
 
 ---
 

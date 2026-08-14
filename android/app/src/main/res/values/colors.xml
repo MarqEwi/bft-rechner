@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Markenfarben fuer das Android-Theme (styles.xml -> AppTheme).
+  Ohne diese Datei greifen die Vorgaben aus der Capacitor-Bibliothek:
+  Indigo #3F51B5 und Pink #FF4081. Sichtbar wird das an System-Bedien-
+  elementen, zum Beispiel den Griffen bei der Textauswahl.
+  Werte und Begruendung: docs/farben.md
+-->
+<resources>
+    <color name="colorPrimary">#4A5D3A</color>
+    <color name="colorPrimaryDark">#3F4A33</color>
+    <color name="colorAccent">#6D8250</color>
+</resources>
